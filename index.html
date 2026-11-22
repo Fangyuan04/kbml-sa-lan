@@ -233,7 +233,6 @@ td .btn.sm{margin-top:4px}
       <textarea id="csv-text" rows="5" readonly hidden style="margin-top:8px"></textarea>
     </div>
   </div>
-  <div class="card"><details><summary><b>Nhật ký xử lý hồ sơ</b></summary><div id="log-list" class="tw"></div><div class="acts"><button class="btn sec" id="reset">Xóa dữ liệu, nạp lại dữ liệu mẫu</button></div></details></div>
 </section>
 
 <!-- ================= NGƯỜI DÂN: KHAI BÁO ================= -->
@@ -981,8 +980,8 @@ $("scan-demo").onclick=()=>{ resetForm({keep:true}); goStep(2); const mau=JSON.p
 (async()=>{ try{ if(window.claude&&claude.use){ const s=await claude.use("sample"); if(s){ const c=await s.limits().catch(()=>null); if(c&&c.images){ aiSample=s; aiCaps=c.images; } } } }catch(e){} $("scan-status").textContent=aiStatus(); renderScanList(); })();
 
 // ------------------------------------------------ nhật ký
-function logView(){ $("log-list").innerHTML=S.log.slice(0,30).map((l,i)=>`<div style="border-bottom:1px solid var(--line);padding:8px 0"><span class="chip c-info">${esc(l.huong)}</span> ${esc(l.nd)} <span class="note">(${fmt(l.t)})</span><details><summary class="note">Gói dữ liệu</summary><pre>${esc(JSON.stringify(l.goi,null,2))}</pre></details></div>`).join(""); }
-$("reset").onclick=()=>{ seed(); sel=null; render(); };
+function logView(){ if(!$("log-list")) return; $("log-list").innerHTML=S.log.slice(0,30).map((l,i)=>`<div style="border-bottom:1px solid var(--line);padding:8px 0"><span class="chip c-info">${esc(l.huong)}</span> ${esc(l.nd)} <span class="note">(${fmt(l.t)})</span><details><summary class="note">Gói dữ liệu</summary><pre>${esc(JSON.stringify(l.goi,null,2))}</pre></details></div>`).join(""); }
+
 
 function render(){ renderDesk(); if(tab==="kv") renderKV(); if(tab==="tc") renderTC(); if(tab==="tk"){ renderTK(); logView(); } if(tab==="my") ownList(); if(tab==="kb") kCheck(); }
 const L0=load(); if(L0&&Array.isArray(L0.vessels)&&Array.isArray(L0.dos)&&L0.seedAt){ S=L0; rebase(); } else seed();
