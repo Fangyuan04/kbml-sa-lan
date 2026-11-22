@@ -429,6 +429,7 @@ function docState(row,ref){
   return "du";
 }
 const ST={thieu:["bad","Thiếu"],thieuhan:["bad","Thiếu ngày hết hạn"],hethan:["bad","Hết hạn"],saphet:["warn","Sắp hết hạn"],du:["ok","Hợp lệ"]};
+const certName=c=>/trưởng/i.test(c.cd||"")?"Giấy chứng nhận khả năng chuyên môn":"Chứng chỉ chuyên môn";
 function crewState(c,ref){ return c.bang?"du":"thieu"; if(!c.han) return "du"; const h=new Date(c.han+"T23:59:59").getTime(); return h<ref?"hethan":h-ref<30*D?"saphet":"du"; }
 function issues(d){
   const v=vessel(d.so), w=[], ref=d.tr||d.t;
@@ -585,8 +586,8 @@ function docTable(d,edit){
     <td><span class="chip c-${ST[s][0]}">${ST[s][1]}</span></td>${edit==="cv"?`<td class="n"><input type="checkbox" data-tick="${r.key}" aria-label="Đã kiểm tra ${esc(r.name)}" ${d.tick[r.key]?"checked":""} ${s==="du"||s==="saphet"?"":"disabled"} ${lock?"disabled":""}></td>`:""}</tr>`; }).join("")}</table>`;
 }
 function crewTable(d,edit){ const v=vessel(d.so), ref=d.tr||d.t, lock=d.status==="capphep"||d.status==="tuchoi";
-  return `<table class="wide"><tr><th>Họ tên</th><th>Chức danh</th><th style="width:170px">Số bằng, giấy chứng nhận</th><th>Tình trạng</th></tr>${v.crew.map((c,i)=>{ const s=crewState(c,ref);
-    return `<tr><td>${esc(c.ten)}</td><td>${esc(c.cd)}</td><td><input data-crew="${i}" data-f="bang" value="${esc(c.bang||"")}" aria-label="Số chứng chỉ ${esc(c.ten)}" ${lock?"disabled":""}></td><td><span class="chip c-${ST[s][0]}">${ST[s][1]}</span></td></tr>`; }).join("")}</table>`;
+  return `<table class="wide"><tr><th>Họ tên</th><th>Chức danh</th><th>Chứng chỉ</th><th style="width:170px">Số bằng, giấy chứng nhận</th><th>Tình trạng</th></tr>${v.crew.map((c,i)=>{ const s=crewState(c,ref);
+    return `<tr><td>${esc(c.ten)}</td><td>${esc(c.cd)}</td><td>${docName(`crew|${d.so}|${i}`,certName(c),{...c,so:c.bang})}</td><td><input data-crew="${i}" data-f="bang" value="${esc(c.bang||"")}" aria-label="Số chứng chỉ ${esc(c.ten)}" ${lock?"disabled":""}></td><td><span class="chip c-${ST[s][0]}">${ST[s][1]}</span></td></tr>`; }).join("")}</table>`;
 }
 function bindDocEdits(box,d,after){
   box.querySelectorAll("[data-doc]").forEach(el=>el.onchange=()=>{ const k=el.dataset.doc, v=vessel(d.so), tgt=el.dataset.scope==="tau"?(v.docs[k]=v.docs[k]||{}):(d.docs[k]=d.docs[k]||{}); tgt[el.dataset.f]=el.value.trim(); delete d.tick[k]; save(); after(); });
@@ -667,7 +668,7 @@ function renderTC(){ const raw=$("tc-s").value.trim().toLowerCase(), q=norm($("t
   $("tc-list").querySelectorAll("[data-tc]").forEach(r=>{ r.onclick=()=>{ tcSel=r.dataset.tc; renderTCD(); }; r.onkeydown=e=>{ if(e.key==="Enter"){ tcSel=r.dataset.tc; renderTCD(); } }; }); renderTCD(); }
 function renderTCD(){ const box=$("tc-detail"), v=tcSel&&vessel(tcSel); box.hidden=!v; if(!v) return;
   const h=S.dos.filter(d=>d.so===v.so).sort((a,b)=>b.t-a.t).slice(0,12), rows=VDOCS.filter(([k])=>k!=="thechap"||v.nganhang).filter(([k])=>k!=="pccc"||(v.docs.pccc||{}).so);
-  box.innerHTML=`<h2><span class="mono">${v.so}</span> – ${esc(v.ten)}</h2><div class="grid"><div><h3>Giấy tờ</h3><div class="tw"><table><tr><th>Giấy tờ</th><th>Số</th><th>Hạn</th></tr>${rows.map(([k,n])=>{ const x=v.docs[k]||{}; return `<tr><td>${docName(`v|${v.so}|${k}`,n,x)}</td><td>${esc(x.so||"–")}</td><td>${fd(x.han)}</td></tr>`; }).join("")}</table></div></div>
+  box.innerHTML=`<h2><span class="mono">${v.so}</span> – ${esc(v.ten)}</h2><div class="grid"><div><h3>Giấy tờ</h3><div class="tw"><table><tr><th>Giấy tờ</th><th>Số</th><th>Hạn</th></tr>${rows.map(([k,n])=>{ const x=v.docs[k]||{}; return `<tr><td>${docName(`v|${v.so}|${k}`,n,x)}</td><td>${esc(x.so||"–")}</td><td>${fd(x.han)}</td></tr>`; }).join("")}${v.crew.map((c,i)=>`<tr><td>${docName(`crew|${v.so}|${i}`,`${certName(c)}: ${c.ten}`,{...c,so:c.bang})}</td><td>${esc(c.bang||"–")}</td><td>–</td></tr>`).join("")}</table></div></div>
   <div><h3>Lịch sử chuyến gần đây</h3><div class="tw"><table><tr><th>Hồ sơ</th><th>Thủ tục</th><th>Vị trí</th><th>Thời gian</th><th>Trạng thái</th></tr>${h.map(d=>`<tr><td class="mono">${d.id}</td><td>${KIND[d.kind]}</td><td>${esc(d.ben)}</td><td>${fmt(d.t)}</td><td>${stChip(d)}</td></tr>`).join("")}</table></div></div></div>`; }
 $("tc-s").oninput=renderTC; $("tc-f").oninput=renderTC;
 
@@ -756,7 +757,7 @@ function paperOf(key,v,d,val){ const r=v.reg||{}, crew=v.crew||[], tt=crew.find(
    pccc:{tt:"GIẤY CHỨNG NHẬN PHÒNG CHÁY, CHỮA CHÁY",sub:"Phương tiện chở xăng dầu, hóa chất",f:[so,...id,["Công dụng",r.loai],han]},
    bg:{tt:"GIẤY PHÉP VẬN CHUYỂN QUA BIÊN GIỚI",sub:"Tuyến Campuchia – Việt Nam",f:[so,...id,["Cảng rời",d&&d.prev],["Nơi đến",d&&d.ben],han]}
   }[key]; }
-const paperCrew=(v,c)=>({tt:"GIẤY CHỨNG NHẬN KHẢ NĂNG CHUYÊN MÔN",sub:"Thuyền viên phương tiện thủy nội địa",f:[["Số chứng chỉ",c.bang],["Họ và tên",c.ten],["Chức danh",c.cd],["Phương tiện đang làm việc",`${v.ten} – ${v.so}`],["Có hiệu lực đến",fd(c.han)]]});
+const paperCrew=(v,c)=>({tt:certName(c).toUpperCase(),sub:"Thuyền viên phương tiện thủy nội địa",f:[["Số",c.bang],["Họ và tên",c.ten],["Chức danh",c.cd],["Phương tiện đang làm việc",`${v.ten} – ${v.so}`]]});
 function paperBkc(d){ const v=vessel(d.so), r=v.reg, tt=v.crew.find(c=>c.cd==="Thuyền trưởng")||{}, den=hasDen(d), roi=hasRoi(d);
   return {tt:"BẢN KHAI CHUNG",sub:`Phương tiện thủy nội địa – Đến [${den?"X":"  "}]  Rời [${roi?"X":"  "}]`,f:[["1. Tên phương tiện",v.ten],["2. Số đăng ký",d.so],["3. Dung tích",r.gt],["4. Trọng tải",`${r.dwt} tấn`],["5. Cầu, bến sẽ cập",d.ben+(d.cm?` (cập mạn ${d.cm})`:"")],["6. Thời gian đến, rời",`Đến: ${den?fullT(d.t):"–"}\nRời: ${fullT(d.kind==="ROI"?d.t:d.tr)}`],["7. Cảng, bến rời cuối cùng",d.prev],["8. Cảng, bến kế tiếp",d.next],["9. Thuyền trưởng",`${tt.ten||""} – ${fmtPhone(v.dt)}`],["10. Chủ phương tiện",`${v.chu}; ${v.dc}; ${v.mail}`],["11. Hàng hóa",`Dỡ: ${hang(d.do)}\nXếp: ${hang(d.xep)}`],["12. Mã giấy phép rời cảng",(d.docs.gprc||{}).so]]}; }
 function paperPermit(d){ const v=vessel(d.so), tt=v.crew.find(c=>c.cd==="Thuyền trưởng")||{}, p=d.permit, at=new Date(p.at);
@@ -784,8 +785,8 @@ function resolvePdf(spec){ const [t,a,b]=String(spec).split("|");
   if(t==="doc"){ const d=dos(a), r=d&&docRows(d).find(x=>x.key===b); return r?{title:r.name,owner:d.so,val:r.val,sp:paperOf(b,vessel(d.so)||{},d,r.val)}:null; }
   if(t==="draft"){ draftV=formVessel(); try{ const d=kDraft(), r=docRows(d).find(x=>x.key===a); return r?{title:r.name,owner:d.so,val:r.val,sp:draftV?paperOf(a,draftV,d,r.val):null}:null; } finally { draftV=null; } }
   if(t==="v"){ const v=vessel(a), x=VDOCS.find(k=>k[0]===b); return v&&x?{title:x[1],owner:v.so,val:v.docs[b]||{},sp:paperOf(b,v,null,v.docs[b]||{})}:null; }
-  if(t==="crew"){ const v=vessel(a), c=v&&v.crew[+b]; return c?{title:`Chứng chỉ: ${c.ten}`,owner:v.so,val:c,sp:paperCrew(v,c)}:null; }
-  if(t==="dcrew"){ const c=draftCrew[+a], v=formVessel()||{ten:"",so:""}; return c?{title:`Chứng chỉ: ${c.ten||"thuyền viên"}`,owner:v.so,val:c,sp:paperCrew(v,c)}:null; }
+  if(t==="crew"){ const v=vessel(a), c=v&&v.crew[+b]; return c?{title:`${certName(c)}: ${c.ten}`,owner:v.so,val:c,sp:paperCrew(v,c)}:null; }
+  if(t==="dcrew"){ const c=draftCrew[+a], v=formVessel()||{ten:"",so:""}; return c?{title:`${certName(c)}: ${c.ten||"thuyền viên"}`,owner:v.so,val:c,sp:paperCrew(v,c)}:null; }
   const d=dos(a), v=d&&vessel(d.so); if(!v) return null;
   if(t==="bkc") return {title:"Bản khai chung",owner:d.so,val:{mau:1,att:(d.docs.bkc||{}).att},sp:paperBkc(d)};
   if(t==="dstv") return {title:"Danh sách thuyền viên",owner:d.so,val:{mau:1,att:(d.docs.dstv||{}).att},sp:{tt:"DANH SÁCH THUYỀN VIÊN",f:[["Tên phương tiện",v.ten],["Số đăng ký",d.so]],table:crewSheet(v)}};
@@ -831,7 +832,7 @@ function loadVessel(){ const n=norm($("v-so").value), old=S.vessels.find(v=>v.so
   $("v-norm").innerHTML=!n?"":`Chuẩn hóa thành <b class="mono">${esc(n)}</b>${old?' <span class="chip c-ok">đã có hồ sơ, thông tin được điền lại</span>':r?' <span class="chip c-info">khớp dữ liệu đăng kiểm (giả lập)</span>':""}`;
   const src=old?old.reg:r; if(src){ $("v-cap").value=src.cap; $("v-loai").value=src.loai; $("v-dwt").value=src.dwt; $("v-gt").value=src.gt; $("v-teu").value=src.teu||""; if(!$("v-ten").value) $("v-ten").value=src.ten; }
   if(old){ $("v-ten").value=old.ten; $("v-chu").value=old.chu; $("v-dc").value=old.dc; $("v-dt").value=old.dt; $("v-mail").value=old.mail; $("v-mmsi").value=old.mmsi; $("v-zalo").checked=old.zalo; $("v-nh").checked=old.nganhang; draftDocs=JSON.parse(JSON.stringify(old.docs)); draftCrew=JSON.parse(JSON.stringify(old.crew)); crewForm(); } }
-function crewForm(){ $("v-crew").innerHTML=`<table class="wide"><tr><th>Họ tên</th><th style="width:130px">Chức danh</th><th style="width:170px">Số bằng, giấy chứng nhận</th></tr>${draftCrew.map((c,i)=>`<tr><td><input id="cw-${i}-ten" class="${c.ai?"ai":""}" data-i="${i}" data-f="ten" value="${esc(c.ten)}" aria-label="Họ tên"></td><td><select id="cw-${i}-cd" data-i="${i}" data-f="cd" aria-label="Chức danh">${["Thuyền trưởng","Máy trưởng","Thợ máy","Thủy thủ"].map(o=>`<option ${o===c.cd?"selected":""}>${o}</option>`).join("")}</select></td><td><input id="cw-${i}-bang" class="${c.ai&&c.bang?"ai":""}" data-i="${i}" data-f="bang" value="${esc(c.bang)}" aria-label="Số chứng chỉ"></td></tr>`).join("")}</table>`;
+function crewForm(){ $("v-crew").innerHTML=`<table class="wide"><tr><th>Họ tên</th><th style="width:130px">Chức danh</th><th style="width:170px">Số bằng, giấy chứng nhận</th><th style="width:230px">Chứng chỉ</th></tr>${draftCrew.map((c,i)=>`<tr><td><input id="cw-${i}-ten" class="${c.ai?"ai":""}" data-i="${i}" data-f="ten" value="${esc(c.ten)}" aria-label="Họ tên"></td><td><select id="cw-${i}-cd" data-i="${i}" data-f="cd" aria-label="Chức danh">${["Thuyền trưởng","Máy trưởng","Thợ máy","Thủy thủ"].map(o=>`<option ${o===c.cd?"selected":""}>${o}</option>`).join("")}</select></td><td><input id="cw-${i}-bang" class="${c.ai&&c.bang?"ai":""}" data-i="${i}" data-f="bang" value="${esc(c.bang)}" aria-label="Số chứng chỉ"></td><td>${hasPdf(c)?pdfLink("dcrew|"+i,certName(c))+"<br>":`<span class="note">${certName(c)}</span><br>`}${attBtn("dcrew|"+i,c)}</td></tr>`).join("")}</table>`;
   $("v-crew").querySelectorAll("input,select").forEach(el=>el.oninput=()=>{ draftCrew[+el.dataset.i][el.dataset.f]=el.value; kCheck(true); }); }
 $("v-addcrew").onclick=()=>{ draftCrew.push({ten:"",cd:"Thủy thủ",bang:"",han:""}); crewForm(); };
 $("v-so").addEventListener("change",()=>{ loadVessel(); kCheck(); });
@@ -880,7 +881,7 @@ $("k-send").onclick=()=>{ const v=formVessel(); draftV=v; const d=kDraft(); draf
 $("s2-back").onclick=()=>goStep(1); $("scan-manual").onclick=()=>goStep(2);
 
 // ------------------------------------------------ theo dõi hồ sơ
-function docLinks(d){ const v=vessel(d.so), rows=docRows(d), a=[...rows.filter(r=>hasPdf(r.val)).map(r=>pdfLink(`doc|${d.id}|${r.key}`,r.name)),pdfLink("bkc|"+d.id,"Bản khai chung"),pdfLink("dstv|"+d.id,"Danh sách thuyền viên")], miss=rows.filter(r=>!hasPdf(r.val)).map(r=>r.name);
+function docLinks(d){ const v=vessel(d.so), rows=docRows(d), a=[...rows.filter(r=>hasPdf(r.val)).map(r=>pdfLink(`doc|${d.id}|${r.key}`,r.name)),...(v?v.crew.map((c,i)=>hasPdf(c)?pdfLink(`crew|${d.so}|${i}`,`${certName(c)}: ${c.ten}`):"").filter(Boolean):[]),pdfLink("bkc|"+d.id,"Bản khai chung"),pdfLink("dstv|"+d.id,"Danh sách thuyền viên")], miss=rows.filter(r=>!hasPdf(r.val)).map(r=>r.name);
   return `<div class="plist">${a.join("")}</div>${miss.length?`<p class="note">Chưa có bản PDF: ${miss.map(esc).join(", ")}.</p>`:""}`; }
 function ownList(){ const q=norm($("my-s").value), rows=S.dos.filter(d=>!q||d.so===q).sort((a,b)=>b.created-a.created).slice(0,q?30:8), box=$("own-list");
   box.innerHTML=(q?"":`<p class="note">Bản mẫu đang hiện 8 hồ sơ mới nhất. Nhập số đăng ký để xem hồ sơ của sà lan bạn.</p>`)+(rows.length?rows.map(d=>`<div class="mycard"><div class="acts" style="margin:0;justify-content:space-between"><b><span class="mono">${d.id}</span> · <span class="mono">${d.so}</span> · ${KIND[d.kind]}</b>${stChip(d)}</div><div class="note">${esc(d.ben)} · ${fmt(d.t)}</div>
