@@ -162,16 +162,16 @@ td .btn.sm{margin-top:4px}
 <header>
   <h1>Cổng Khai Báo Một Lần cho sà lan (KBML)</h1>
   <div class="sub">Khai báo và cấp phép vào, rời cho phương tiện thủy nội địa – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
-  <div class="modes" id="modes" hidden><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Cảng vụ duyệt</button></div>
+  <div class="modes" id="modes" role="group" aria-label="Chế độ sử dụng"><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Theo dõi hồ sơ</button></div>
 </header>
 <div class="demo"><b>Bản mẫu trong báo cáo thực tập của sinh viên, dùng dữ liệu giả.</b> Đây không phải hệ thống chính thức của Cảng vụ Hàng hải TP.HCM hay cơ quan đăng kiểm. Giấy tờ và giấy phép hiển thị trên trang chỉ là bản mô phỏng, không có giá trị pháp lý.</div>
 <nav id="tabs">
-  <button data-t="hoso" data-g="cv" class="on">Hồ sơ cần xử lý <b id="n-hoso">0</b></button>
+  <button data-t="hoso" data-g="none" hidden>Hồ sơ cần xử lý <b id="n-hoso">0</b></button>
+  <button data-t="my" data-g="cv" hidden>Hồ sơ đã gửi</button>
   <button data-t="kv" data-g="cv">Sà lan trong khu vực</button>
   <button data-t="tc" data-g="cv">Tra cứu phương tiện</button>
   <button data-t="tk" data-g="cv">Thống kê</button>
   <button data-t="kb" data-g="dan" hidden>Khai báo mới</button>
-  <button data-t="my" data-g="dan" hidden>Theo dõi hồ sơ</button>
 </nav>
 <main>
 
@@ -537,17 +537,17 @@ function rebase(){ const delta=Date.now()-S.seedAt; if(delta<10*60e3) return;
 
 // ------------------------------------------------ điều hướng
 const VIEWS={"ho-so":"hoso","trong-khu-vuc":"kv","tra-cuu":"tc","thong-ke":"tk","khai-bao":"kb","theo-doi":"my"};
-const GROUP={hoso:"cv",kv:"cv",tc:"cv",tk:"cv",kb:"dan",my:"dan"};
+const GROUP={hoso:"cv",kv:"cv",tc:"cv",tk:"cv",kb:"dan",my:"cv"};
 const nameOf=t=>Object.keys(VIEWS).find(k=>VIEWS[k]===t);
 let skipHash=null;
 function showTab(t){ tab=t; const g=GROUP[t]; document.querySelectorAll("#modes button").forEach(x=>x.classList.toggle("on",x.dataset.mode===g)); document.querySelectorAll("#tabs button").forEach(x=>{ x.classList.toggle("on",x.dataset.t===t); x.hidden=x.dataset.g!==g; });
   Object.values(VIEWS).forEach(k=>$("t-"+k).classList.toggle("show",k===t)); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ const t=b.dataset.t,n=nameOf(t); showTab(t); try{ if(location.hash.slice(1)!==n){ skipHash=n; location.hash=n; } }catch(e){} });
-document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{ const t=b.dataset.mode==="cv"?"hoso":"kb", n=nameOf(t); showTab(t); try{ if(location.hash.slice(1)!==n){ skipHash=n; location.hash=n; } }catch(e){} });
+document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{ const t=b.dataset.mode==="cv"?"my":"kb", n=nameOf(t); showTab(t); try{ if(location.hash.slice(1)!==n){ skipHash=n; location.hash=n; } }catch(e){} });
 window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(h&&h===skipHash){ skipHash=null; return; } skipHash=null; routeHash(); });
 function routeHash(){ const h=location.hash.slice(1);
-  if(h.includes("=")){ const p=new URLSearchParams(h); showTab(GROUP[p.get("tab")]==="dan"?p.get("tab"):"kb"); if(p.get("sel")){ sel=p.get("sel"); renderDesk(); } if(p.get("f")){ $("q-f").value=p.get("f"); renderDesk(); } if(p.get("so")){ const x=S.dos.filter(d=>d.so===p.get("so")&&($("q-f").value==="capphep"?d.status==="capphep":d.status==="cho"))[0]; if(x){ sel=x.id; renderDesk(); } } if(p.get("v")){ tcSel=p.get("v"); renderTC(); } if(p.get("my")){ $("my-s").value=p.get("my"); ownList(); } if(p.get("demo")) $("scan-demo").click(); if(p.get("pdf")) openPdf(p.get("pdf").replace("@",sel)); return; }
-  showTab(VIEWS[h]&&GROUP[VIEWS[h]]==="dan"?VIEWS[h]:"kb"); }
+  if(h.includes("=")){ const p=new URLSearchParams(h); showTab(p.get("tab")&&p.get("tab")!=="hoso"?p.get("tab"):"kb"); if(p.get("sel")){ sel=p.get("sel"); renderDesk(); } if(p.get("f")){ $("q-f").value=p.get("f"); renderDesk(); } if(p.get("so")){ const x=S.dos.filter(d=>d.so===p.get("so")&&($("q-f").value==="capphep"?d.status==="capphep":d.status==="cho"))[0]; if(x){ sel=x.id; renderDesk(); } } if(p.get("v")){ tcSel=p.get("v"); renderTC(); } if(p.get("my")){ $("my-s").value=p.get("my"); ownList(); } if(p.get("demo")) $("scan-demo").click(); if(p.get("pdf")) openPdf(p.get("pdf").replace("@",sel)); return; }
+  showTab(VIEWS[h]&&VIEWS[h]!=="hoso"?VIEWS[h]:"kb"); }
 function copyText(btn,txt,el){ const pick=()=>{ try{ if(el&&el.select){ el.select(); } else if(el){ const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); } }catch(e){} };
   try{ navigator.clipboard.writeText(txt).then(()=>{ btn.textContent="Đã chép"; },()=>{ pick(); btn.textContent="Nhấn Ctrl+C"; }); }catch(e){ pick(); btn.textContent="Nhấn Ctrl+C"; } }
 
