@@ -224,6 +224,7 @@ td .btn.sm{margin-top:4px}
       <div class="chart" id="chart"></div>
       <details><summary class="note">Bảng số liệu</summary><div id="chart-table" class="tw"></div></details>
       <p class="note">Tính các hồ sơ đã cấp phép và đang xử lý, không tính hồ sơ bị từ chối; hôm nay gồm cả lượt dự kiến.</p>
+      <p class="note"><b>Số liệu mô phỏng:</b> web Cảng vụ không công bố lượt sà lan. Quy mô khoảng 100 lượt vào mỗi ngày được ước từ 12.292 lượt vào thuộc Đại diện Cần Giờ trên hệ thống của Cục, giả định tính từ 01/7/2026.</p>
     </div>
     <div class="card">
       <h2>Hàng hóa thông qua 7 ngày gần nhất</h2>
@@ -390,8 +391,8 @@ const REG={
 let S, tab="hoso", sel=null, mode="den", tcSel=null;
 const $=id=>document.getElementById(id);
 try{ document.documentElement.lang="vi"; }catch(e){}
-function save(){ try{ localStorage.setItem("kbml-salan-v3",JSON.stringify(S)); }catch(e){} }
-function load(){ try{ localStorage.removeItem("kbml-salan-v2"); const t=localStorage.getItem("kbml-salan-v3"); if(t) return JSON.parse(t); }catch(e){} return null; }
+function save(){ try{ localStorage.setItem("kbml-salan-v4",JSON.stringify(S)); }catch(e){} }
+function load(){ try{ localStorage.removeItem("kbml-salan-v2"); localStorage.removeItem("kbml-salan-v3"); const t=localStorage.getItem("kbml-salan-v4"); if(t) return JSON.parse(t); }catch(e){} return null; }
 function norm(s){ const t=(s||"").toUpperCase().replace(/[\s\-\._\/]+/g,""); const m=t.match(/^([A-ZĐ]+)(\d+)$/); return m?m[1]+"-"+m[2]:t; }
 function fmt(ts){ if(ts===null||ts===undefined||isNaN(ts)) return "–"; const d=new Date(ts); return `${p2(d.getHours())}:${p2(d.getMinutes())} ${p2(d.getDate())}/${p2(d.getMonth()+1)}`; }
 function fd(s){ return s?s.split("-").reverse().join("/"):"–"; }
@@ -492,14 +493,21 @@ function seed(){
   V("AG-9212").nganhang=true; V("AG-9212").docs.thechap={so:"TC-12",han:dateIn(300)};
   const bulk=["BP1","BP2","BP3","BP4","BP5","BP7 – Hoàng Minh","BP8","BP9","BP10","BP11","BP12","BP13","BVP3","BP1-ITC","BP2-ITC","BP3-ITC","BP17"];
   const start=day0(now)-6*D;
+  // Mô phỏng quy mô thật: hệ thống của Cục ghi 12.292 lượt sà lan vào thuộc Đại diện Cần Giờ.
+  // Giả định khoảng 01/7–04/11/2026 (≈ 126 ngày) => khoảng 98 lượt vào mỗi ngày; 125 sà lan giả tạo ra mức này.
+  const PV=["SG","ĐN","BD","LA","TG","BTR","VL","CT","AG","ĐT","TV","BV"], fleet=[];
+  for(let i=0;i<125;i++){ const so=PV[i%PV.length]+"-"+(7001+i), cont=i%5===0, dwt=cont?1500+(i*37)%1500:600+(i*53)%1400;
+    REG[so]={ten:"SÀ LAN MÔ PHỎNG "+String(i+1).padStart(3,"0"),cap:["VR-SI","VR-SII","VR-SIII"][i%3],loai:cont?"Chở container":"Chở hàng rời",dwt,gt:Math.round(dwt*.52),teu:cont?60+(i%6)*20:0};
+    S.vessels.push(mkVessel(so,12+i)); fleet.push(so); }
   // Lịch sử 7 ngày: các chuyến đã cấp phép
-  ["SG-9101","ĐN-9202","BV-9404","TG-9505","LA-9606","SG-9909","BD-9010","TN-9111"].forEach(so=>{
-    const v=V(so), cont=v.reg.teu>0; let t=start+R()*14*H;
-    while(t<now-26*H){
+  ["SG-9101","ĐN-9202","BV-9404","TG-9505","LA-9606","SG-9909","BD-9010","TN-9111",...fleet].forEach(so=>{
+    const v=V(so), cont=v.reg.teu>0, sim=fleet.includes(so); let t=sim?start-2*D+R()*40*H:start+R()*14*H;
+    while(t<(sim?now:now-26*H)){
       const stay=(cont?(6+R()*8):(10+R()*26))*H, tr=t+stay, kind=kindOf(t,tr), h=pick(["Than","Clinker","Đá xây dựng","Cát"]), kl=Math.round(v.reg.dwt*(.78+R()*.17));
       const c=(n)=>({loai:"Container",tan:Math.round(v.reg.dwt*.45),teu:Math.round(v.reg.teu*n),cont:Math.round(v.reg.teu*n/2)});
       const base={so,t,tr,ben:cont?pick(TERMS):pick(bulk),cm:cont?"":"MẪU MOTHER "+(1+Math.floor(R()*5)),do:cont?c(.6):{loai:"Không hàng",tan:0,teu:0,cont:0},xep:cont?c(.7):{loai:h,tan:kl,teu:0,cont:0},created:t-3*H};
       const docs={gprc:gp(),pxk:{so:"PXK-"+Math.floor(1000+R()*8999)}};
+      if(sim&&tr>now){ const a=addDos({...base,kind:"DEN",docs:{gprc:docs.gprc},xep:{loai:"Không hàng",tan:0,teu:0,cont:0}}); issue(a,t+.4*H); break; }
       if(kind==="DENROI"){ issue(addDos({...base,kind,docs}),t+.4*H); }
       else { const a=addDos({...base,kind,docs:{gprc:docs.gprc},xep:{loai:"Không hàng",tan:0,teu:0,cont:0}}); issue(a,t+.4*H);
              issue(addDos({...base,kind:"ROI",t:tr,tr:null,denId:a.id,docs:{pxk:docs.pxk},do:{loai:"Không hàng",tan:0,teu:0,cont:0},created:tr-3*H}),tr-.5*H); }
