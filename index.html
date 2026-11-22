@@ -161,10 +161,10 @@ td .btn.sm{margin-top:4px}
 <body>
 <header>
   <h1>Cổng Khai Báo Một Lần cho sà lan (KBML)</h1>
-  <div class="sub">Khai báo và cấp phép vào, rời cho phương tiện thủy nội địa – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
+  <div class="sub">Khai báo vào, rời cảng của sà lan để Cảng vụ theo dõi – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
   <div class="modes" id="modes" role="group" aria-label="Chế độ sử dụng"><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Theo dõi hồ sơ</button></div>
 </header>
-<div class="demo"><b>Bản mẫu trong báo cáo thực tập của sinh viên, dùng dữ liệu giả.</b> Đây không phải hệ thống chính thức của Cảng vụ Hàng hải TP.HCM hay cơ quan đăng kiểm. Giấy tờ và giấy phép hiển thị trên trang chỉ là bản mô phỏng, không có giá trị pháp lý.</div>
+<div class="demo"><b>Bản mẫu trong báo cáo thực tập của sinh viên, dùng dữ liệu giả.</b> Đây không phải hệ thống chính thức của Cảng vụ Hàng hải TP.HCM hay cơ quan đăng kiểm. Giấy tờ hiển thị trên trang chỉ là bản mô phỏng, không có giá trị pháp lý.</div>
 <nav id="tabs">
   <button data-t="hoso" data-g="none" hidden>Hồ sơ cần xử lý <b id="n-hoso">0</b></button>
   <button data-t="my" data-g="cv" hidden>Hồ sơ đã gửi</button>
@@ -223,7 +223,7 @@ td .btn.sm{margin-top:4px}
       <div class="legend"><span><i style="background:var(--s1)"></i>Vào cảng</span><span><i style="background:var(--s2)"></i>Rời cảng</span></div>
       <div class="chart" id="chart"></div>
       <details><summary class="note">Bảng số liệu</summary><div id="chart-table" class="tw"></div></details>
-      <p class="note">Tính các hồ sơ đã cấp phép và đang xử lý, không tính hồ sơ bị từ chối; hôm nay gồm cả lượt dự kiến.</p>
+      <p class="note">Tính theo các khai báo vào, rời đã ghi nhận; hôm nay gồm cả lượt dự kiến.</p>
       <p class="note"><b>Số liệu mô phỏng:</b> web Cảng vụ không công bố lượt sà lan. Quy mô khoảng 100 lượt vào mỗi ngày được ước từ 12.292 lượt vào thuộc Đại diện Cần Giờ trên hệ thống của Cục, giả định tính từ 01/7/2026.</p>
     </div>
     <div class="card">
@@ -391,8 +391,8 @@ const REG={
 let S, tab="hoso", sel=null, mode="den", tcSel=null;
 const $=id=>document.getElementById(id);
 try{ document.documentElement.lang="vi"; }catch(e){}
-function save(){ try{ localStorage.setItem("kbml-salan-v4",JSON.stringify(S)); }catch(e){} }
-function load(){ try{ localStorage.removeItem("kbml-salan-v2"); localStorage.removeItem("kbml-salan-v3"); const t=localStorage.getItem("kbml-salan-v4"); if(t) return JSON.parse(t); }catch(e){} return null; }
+function save(){ try{ localStorage.setItem("kbml-salan-v5",JSON.stringify(S)); }catch(e){} }
+function load(){ try{ localStorage.removeItem("kbml-salan-v2"); localStorage.removeItem("kbml-salan-v3"); localStorage.removeItem("kbml-salan-v4"); const t=localStorage.getItem("kbml-salan-v5"); if(t) return JSON.parse(t); }catch(e){} return null; }
 function norm(s){ const t=(s||"").toUpperCase().replace(/[\s\-\._\/]+/g,""); const m=t.match(/^([A-ZĐ]+)(\d+)$/); return m?m[1]+"-"+m[2]:t; }
 function fmt(ts){ if(ts===null||ts===undefined||isNaN(ts)) return "–"; const d=new Date(ts); return `${p2(d.getHours())}:${p2(d.getMinutes())} ${p2(d.getDate())}/${p2(d.getMonth()+1)}`; }
 function fd(s){ return s?s.split("-").reverse().join("/"):"–"; }
@@ -460,7 +460,7 @@ const hasBad=w=>w.some(x=>x[0]==="bad");
 function chips(w){ return w&&w.length?w.map(x=>`<span class="chip c-${x[0]}">${esc(x[1])}</span>`).join(""):`<span class="chip c-ok">Không có vấn đề</span>`; }
 function allTicked(d){ return docRows(d).every(r=>d.tick[r.key])&&d.tick.crew; }
 function canApprove(d){ return d.status==="cho"&&!hasBad(issues(d))&&allTicked(d); }
-const STS={cho:["info","Chờ kiểm tra"],bosung:["warn","Chờ bổ sung"],capphep:["ok","Đã cấp phép"],tuchoi:["bad","Từ chối"]};
+const STS={cho:["info","Chờ kiểm tra"],bosung:["warn","Chờ bổ sung"],capphep:["ok","Đã ghi nhận"],tuchoi:["bad","Từ chối"]};
 const stChip=d=>`<span class="chip c-${STS[d.status][0]}">${STS[d.status][1]}</span>`;
 
 // ------------------------------------------------ đếm số lượng
@@ -483,7 +483,7 @@ function mkVessel(so,i,o={}){ const r=REG[so], owners=["Công ty TNHH Vận tả
    crew:[{ten:`Thuyền trưởng mẫu ${n}`,cd:"Thuyền trưởng",bang:`T2-${n}01`,han:dateIn(500)},{ten:`Máy trưởng mẫu ${n}`,cd:"Máy trưởng",bang:`M2-${n}02`,han:dateIn(480)},{ten:`Thủy thủ mẫu ${n}`,cd:"Thủy thủ",bang:`TT-${n}03`,han:dateIn(420)}]};
   return Object.assign(v,o); }
 function addDos(o){ const d={id:"HS"+String(S.seq++).padStart(4,"0"),status:"cho",kenh:"Trực tuyến",cm:"",prev:"TP. Hồ Chí Minh",next:"TP. Hồ Chí Minh",nuocngoai:false,do:{loai:"Không hàng",tan:0,teu:0,cont:0},xep:{loai:"Không hàng",tan:0,teu:0,cont:0},docs:{},tick:{},note:"",created:Date.now(),...o}; S.dos.push(d); return d; }
-function issue(d,at){ d.status="capphep"; docRows(d).forEach(r=>d.tick[r.key]=true); d.tick.crew=true; S.gp++; d.permit={so:`${S.gp}/GP-CG`,at:at,tu:d.t,den:d.tr||d.t+D}; }
+function issue(d,at){ d.status="capphep"; d.ghiNhan=at; docRows(d).forEach(r=>d.tick[r.key]=true); d.tick.crew=true; }
 function seed(){
   const now=Date.now(), R=rng(20261118), pick=a=>a[Math.floor(R()*a.length)];
   S={vessels:[],dos:[],log:[],seq:1,gp:1200,seedAt:now};
@@ -536,6 +536,7 @@ function seed(){
   const c=addDos({so:"TN-9111",kind:"ROI",t:now+8*H,tr:null,ben:"BP2-ITC",denId:S.dos.filter(x=>x.so==="TN-9111"&&x.kind==="DEN").pop().id,xep:{loai:"Clinker",tan:460,teu:0,cont:0},docs:{},status:"bosung",note:"Đề nghị bổ sung: Phiếu xuất kho.",created:now-2*H}); // đang chờ bổ sung
   // Mọi giấy tờ mẫu đã có số đều xem được bản mô phỏng
   const mark=o=>{ if(o&&o.so) o.mau=1; }; S.vessels.forEach(v=>{ Object.values(v.docs).forEach(mark); v.crew.forEach(c=>{ if(c.bang) c.mau=1; }); }); S.dos.forEach(d=>Object.values(d.docs||{}).forEach(mark));
+  S.dos.forEach(d=>{ if(d.status!=="capphep") issue(d,d.created); d.note=""; });
   log("tiếp nhận","Nạp dữ liệu mẫu",{phuong_tien:S.vessels.length,ho_so:S.dos.length});
   save();
 }
@@ -673,7 +674,7 @@ function renderTC(){ const raw=$("tc-s").value.trim().toLowerCase(), q=norm($("t
 function renderTCD(){ const box=$("tc-detail"), v=tcSel&&vessel(tcSel); box.hidden=!v; if(!v) return;
   const h=S.dos.filter(d=>d.so===v.so).sort((a,b)=>b.t-a.t).slice(0,12), rows=VDOCS.filter(([k])=>k!=="thechap"||v.nganhang).filter(([k])=>k!=="pccc"||(v.docs.pccc||{}).so);
   box.innerHTML=`<h2><span class="mono">${v.so}</span> – ${esc(v.ten)}</h2><div class="grid"><div><h3>Giấy tờ</h3><div class="tw"><table><tr><th>Giấy tờ</th><th>Số</th><th>Hạn</th></tr>${rows.map(([k,n])=>{ const x=v.docs[k]||{}; return `<tr><td>${docName(`v|${v.so}|${k}`,n,x)}</td><td>${esc(x.so||"–")}</td><td>${fd(x.han)}</td></tr>`; }).join("")}${v.crew.map((c,i)=>`<tr><td>${docName(`crew|${v.so}|${i}`,`Chứng chỉ: ${c.ten}`,{...c,so:c.bang})}</td><td>${esc(c.bang||"–")}</td><td>${fd(c.han)}</td></tr>`).join("")}</table></div></div>
-  <div><h3>Lịch sử chuyến gần đây</h3><div class="tw"><table><tr><th>Hồ sơ</th><th>Thủ tục</th><th>Vị trí</th><th>Thời gian</th><th>Giấy phép</th><th>Trạng thái</th></tr>${h.map(d=>`<tr><td class="mono">${d.id}</td><td>${KIND[d.kind]}</td><td>${esc(d.ben)}</td><td>${fmt(d.t)}</td><td>${d.permit?pdfLink("permit|"+d.id,d.permit.so):"–"}</td><td>${stChip(d)}</td></tr>`).join("")}</table></div></div></div>`; }
+  <div><h3>Lịch sử chuyến gần đây</h3><div class="tw"><table><tr><th>Hồ sơ</th><th>Thủ tục</th><th>Vị trí</th><th>Thời gian</th><th>Trạng thái</th></tr>${h.map(d=>`<tr><td class="mono">${d.id}</td><td>${KIND[d.kind]}</td><td>${esc(d.ben)}</td><td>${fmt(d.t)}</td><td>${stChip(d)}</td></tr>`).join("")}</table></div></div></div>`; }
 $("tc-s").oninput=renderTC; $("tc-f").oninput=renderTC;
 
 // ------------------------------------------------ thống kê
@@ -694,7 +695,7 @@ function renderTK(){ const now=Date.now(), t0=day0(now)-6*D, ev=events(), days=[
   $("chart-table").innerHTML=`<table><tr><th>Ngày</th><th class="n">Vào</th><th class="n">Rời</th></tr>${days.map(d=>`<tr><td>${d.lb}</td><td class="n">${d.vao}</td><td class="n">${d.roi}</td></tr>`).join("")}</table>`;
   const g={}; S.dos.filter(d=>d.status==="capphep"&&d.t>=t0).forEach(d=>{ [["do","do"],["xep","xep"]].forEach(([k])=>{ const h=d[k]; if(h&&h.loai&&h.loai!=="Không hàng"){ const x=g[h.loai]=g[h.loai]||{do:0,xep:0,teu:0}; x[k]+=h.tan||0; x.teu+=h.teu||0; } }); });
   const e=Object.entries(g).sort((a,b)=>(b[1].do+b[1].xep)-(a[1].do+a[1].xep));
-  $("by-hang").innerHTML=e.length?`<table><tr><th>Loại hàng</th><th class="n">Dỡ (tấn)</th><th class="n">Xếp (tấn)</th><th class="n">TEU</th></tr>${e.map(([k,x])=>`<tr><td>${esc(k)}</td><td class="n">${x.do.toLocaleString("vi-VN")}</td><td class="n">${x.xep.toLocaleString("vi-VN")}</td><td class="n">${x.teu?x.teu.toLocaleString("vi-VN"):"–"}</td></tr>`).join("")}</table><p class="note">Chỉ tính hồ sơ đã cấp phép.</p>`:`<p class="note">Chưa có dữ liệu.</p>`;
+  $("by-hang").innerHTML=e.length?`<table><tr><th>Loại hàng</th><th class="n">Dỡ (tấn)</th><th class="n">Xếp (tấn)</th><th class="n">TEU</th></tr>${e.map(([k,x])=>`<tr><td>${esc(k)}</td><td class="n">${x.do.toLocaleString("vi-VN")}</td><td class="n">${x.xep.toLocaleString("vi-VN")}</td><td class="n">${x.teu?x.teu.toLocaleString("vi-VN"):"–"}</td></tr>`).join("")}</table><p class="note">Tính theo các khai báo đã ghi nhận.</p>`:`<p class="note">Chưa có dữ liệu.</p>`;
 }
 const CSV_NAME="kbml-sa-lan-dai-dien-can-gio.csv", IN_VIEWER=!!(window.claude&&typeof window.claude.use==="function"); let dl=null;
 const csvMode=()=>dl?"dl":(IN_VIEWER?"copy":"local");
@@ -864,7 +865,7 @@ function kCheck(keepDocs){ if($("s2").hidden) return; draftV=formVessel();
     if(!draftV||isNaN(d.t)){ $("k-docs").innerHTML=`<p class="note">Nhập số đăng ký và thời gian để hiện danh sách giấy tờ cần nộp.</p>`; $("k-check").innerHTML=`<span class="chip c-bad">Còn thiếu: ${e.join(", ")}</span>`; $("k-send").disabled=true; return; }
     if(!keepDocs) kDocs(d);
     const w=issues(d); if(mode==="den"&&d.tr<=d.t) w.push(["bad","Dự kiến rời phải sau thời gian đến"]); if(e.length) w.unshift(["bad","Còn thiếu: "+e.join(", ")]);
-    $("k-check").innerHTML=chips(w)+(w.some(x=>/: thiếu|hết hạn/.test(x[1]))?`<p class="note">Vẫn gửi được khi thiếu giấy tờ; Cảng vụ sẽ yêu cầu bổ sung.</p>`:"");
+    $("k-check").innerHTML=chips(w)+(w.some(x=>/: thiếu|hết hạn/.test(x[1]))?`<p class="note">Vẫn gửi được khi thiếu giấy tờ; Cảng vụ có thể kiểm tra sau.</p>`:"");
     const block=e.length||w.some(x=>x[0]==="bad"&&/Cấp |vượt|Trùng|sau thời gian/.test(x[1])); $("k-send").disabled=!!block||!$("k-confirm").checked;
   } finally { draftV=null; }
 }
@@ -878,9 +879,9 @@ function resetForm(o={}){ document.querySelectorAll("#s2 input:not([type=checkbo
   $("v-loai").selectedIndex=0; $("k-ben").selectedIndex=0; ["do","xep"].forEach(k=>{ $(`k-${k}-loai`).value="Không hàng"; termGrid(k); }); draftDocs={}; Object.keys(tripDocs).forEach(k=>delete tripDocs[k]); draftCrew=[{ten:"",cd:"Thuyền trưởng",bang:"",han:""},{ten:"",cd:"Máy trưởng",bang:"",han:""}]; crewForm(); aiMark.clear(); scanMeta=null; $("ai-sum").innerHTML=""; $("v-norm").innerHTML=""; $("k-msg").innerHTML="";
   $("k-t").value=li(day0(Date.now())+D+7*H); $("k-tr").value=li(day0(Date.now())+D+16*H); setMode("den"); if(!o.keep){ scanFiles=[]; renderScanList(); $("scan-status").textContent=aiStatus(); } }
 $("k-send").onclick=()=>{ const v=formVessel(); draftV=v; const d=kDraft(); draftV=null; delete d.id; const clean=o=>{ if(o) delete o.ai; }; Object.values(v.docs).forEach(clean); v.crew.forEach(clean); Object.values(d.docs).forEach(clean);
-  const old=S.vessels.find(x=>x.so===v.so); if(old) Object.assign(old,v); else S.vessels.push(v); if(scanMeta) d.ai=scanMeta; const r=addDos(d);
+  const old=S.vessels.find(x=>x.so===v.so); if(old) Object.assign(old,v); else S.vessels.push(v); if(scanMeta) d.ai=scanMeta; const r=addDos(d); issue(r,Date.now());
   log("tiếp nhận",`Hồ sơ ${r.id} (${r.so}) – ${KIND[r.kind]} – ${r.kenh}${r.ai?" – có dùng AI đọc giấy tờ":""}`,{ma_ho_so:r.id,so_dang_ky:r.so,thu_tuc:KIND[r.kind],vi_tri:r.ben,thoi_gian:new Date(r.t).toISOString(),ai:r.ai||null}); sel=r.id; save();
-  $("s3").innerHTML=`<h2>Đã gửi hồ sơ ${r.id}</h2><p>Hồ sơ của sà lan <b class="mono">${r.so}</b> đã chuyển tới ${DV}. Khi có kết quả, bạn xem ở mục Theo dõi hồ sơ.</p><div class="acts"><button class="btn" id="s3-my">Theo dõi hồ sơ</button><button class="btn sec" id="s3-new">Khai chuyến mới</button></div>`;
+  $("s3").innerHTML=`<h2>Đã gửi hồ sơ ${r.id}</h2><p>Hồ sơ của sà lan <b class="mono">${r.so}</b> đã chuyển tới ${DV}. Cảng vụ đã nhận được thông tin chuyến này; bạn xem lại ở mục Hồ sơ đã gửi.</p><div class="acts"><button class="btn" id="s3-my">Theo dõi hồ sơ</button><button class="btn sec" id="s3-new">Khai chuyến mới</button></div>`;
   $("s3-my").onclick=()=>{ $("my-s").value=r.so; showTab("my"); }; $("s3-new").onclick=()=>{ goStep(1); }; resetForm(); kenh="Trực tuyến"; kenhNote(); goStep(3); renderDesk(); };
 $("s2-back").onclick=()=>goStep(1); $("scan-manual").onclick=()=>goStep(2);
 
@@ -890,7 +891,6 @@ function docLinks(d){ const v=vessel(d.so), rows=docRows(d), a=[...rows.filter(r
 function ownList(){ const q=norm($("my-s").value), rows=S.dos.filter(d=>!q||d.so===q).sort((a,b)=>b.created-a.created).slice(0,q?30:8), box=$("own-list");
   box.innerHTML=(q?"":`<p class="note">Bản mẫu đang hiện 8 hồ sơ mới nhất. Nhập số đăng ký để xem hồ sơ của sà lan bạn.</p>`)+(rows.length?rows.map(d=>`<div class="mycard"><div class="acts" style="margin:0;justify-content:space-between"><b><span class="mono">${d.id}</span> · <span class="mono">${d.so}</span> · ${KIND[d.kind]}</b>${stChip(d)}</div><div class="note">${esc(d.ben)} · ${fmt(d.t)}</div>
     ${d.status==="bosung"?`<div class="msg c-warn">${esc(d.note)}</div><div class="tw" data-edit="${d.id}">${docTable(d,"dan")}</div><div class="acts"><button class="btn sm" data-re="${d.id}">Đã bổ sung, gửi lại</button></div>`:""}
-    ${d.permit?`<div class="plist">${pdfLink("permit|"+d.id,"Giấy phép "+d.permit.so)}</div>`:""}
     <details><summary class="note">Xem giấy tờ đã nộp (PDF)</summary>${docLinks(d)}</details></div>`).join(""):`<p class="note">Không tìm thấy hồ sơ của số đăng ký này.</p>`);
   box.querySelectorAll("[data-edit]").forEach(el=>bindDocEdits(el,dos(el.dataset.edit),ownList));
   box.querySelectorAll("[data-re]").forEach(b=>b.onclick=()=>{ const d=dos(b.dataset.re); d.status="cho"; d.note=""; log("tiếp nhận",`${d.id} gửi lại sau khi bổ sung`,{ma_ho_so:d.id}); sel=d.id; save(); render(); }); }
