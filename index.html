@@ -9,8 +9,8 @@
 /* Bố cục: bàn làm việc của chuyên viên Cảng vụ: hàng đợi bên trái, hồ sơ đang xử lý bên phải.
    Màu: xanh hải quân cho khung; giấy kem cho chứng từ; đỏ/vàng/xanh lá cho kết quả kiểm tra; xanh/cam cho lượt vào/rời. */
 :root{
-  --bg:#f4f6f9; --card:#ffffff; --ink:#1d2733; --muted:#5d6b7a; --line:#d9e0e8;
-  --brand:#1f3b63; --on-brand:#ffffff; --title:#1f3b63; --btn:#2f5d95; --btn-sec:#e9eef4; --focus:#2f5d95;
+  --bg:#eef1f5; --card:#ffffff; --ink:#1d2733; --muted:#5d6b7a; --line:#d6dde6;
+  --brand:#1e4c93; --on-brand:#ffffff; --title:#1e4c93; --btn:#1e4c93; --btn-sec:#e9eef4; --focus:#2f5d95;
   --ok:#1e7a46; --okbg:#e5f4ea; --ok-btn:#1e7a46;
   --warn:#8a5a00; --warnbg:#fff3d6;
   --bad:#a12a2a; --badbg:#fde8e8; --bad-btn:#a12a2a;
@@ -19,23 +19,8 @@
   --demo-bg:#ffe9a8; --demo-ink:#5a3d00; --demo-line:#e8cf7d;
   --code-bg:#0f1e30; --code-ink:#d6e4f5;
   --aibg:#fff6d6; --aibd:#e3c65a; --pv-bg:#59626d; --s1:#2a78d6; --s2:#eb6834; --grid:#e3e8ee; --axis:#c3c9d2;
-  --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --font:Arial,Helvetica,"Segoe UI",sans-serif;
   --font-mono:Consolas,"Cascadia Mono",Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0f141b; --card:#18202a; --ink:#e4eaf1; --muted:#9fb0c2; --line:#2c3846;
-    --brand:#162a45; --on-brand:#ffffff; --title:#9cc4ee; --btn:#3d74b8; --btn-sec:#273341; --focus:#8fbcf0;
-    --ok:#7fd8a4; --okbg:#173327; --ok-btn:#227a49;
-    --warn:#f2c86f; --warnbg:#3b2f12;
-    --bad:#f3a3a3; --badbg:#3f1f22; --bad-btn:#a83a3a;
-    --info:#95c6f5; --infobg:#17304b;
-    --head:#202a36; --head-ink:#c8d4e1; --ro-ink:#b5c2d0; --field:#111821; --field-ro:#1b2430; --sel:#1c2b3d;
-    --demo-bg:#3a3013; --demo-ink:#f4dea0; --demo-line:#5d4b1d;
-    --code-bg:#0a0f16; --code-ink:#d6e4f5;
-    --aibg:#3a3013; --aibd:#8a6f24; --pv-bg:#0a0e13; --s1:#3987e5; --s2:#d95926; --grid:#26313d; --axis:#3a4654;
-    color-scheme:dark;
-  }
 }
 :root[data-theme="dark"]{
   --bg:#0f141b; --card:#18202a; --ink:#e4eaf1; --muted:#9fb0c2; --line:#2c3846;
@@ -53,25 +38,26 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14.5px}
-header{background:var(--brand);color:var(--on-brand);padding-block:12px;
+header{background:var(--card);color:var(--ink);border-top:4px solid var(--brand);padding-block:14px;
   padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px))}
-header h1{font-size:19px;margin:0;font-weight:600;text-wrap:balance}
-header .sub{font-size:12.5px;opacity:.85}
+header h1{font-size:21px;margin:0;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.2px;text-wrap:balance}
+header .sub{font-size:13px;color:var(--muted);margin-top:2px}
 .demo{background:var(--demo-bg);color:var(--demo-ink);font-size:12.5px;padding-block:6px;border-bottom:1px solid var(--demo-line);
   padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px))}
-nav{display:flex;gap:2px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center;
+nav{display:flex;gap:0;background:var(--brand);border-bottom:3px solid #163a73;flex-wrap:wrap;align-items:center;
   padding-left:max(20px, env(safe-area-inset-left, 0px));padding-right:max(20px, env(safe-area-inset-right, 0px))}
-nav button{border:0;background:none;padding:12px 12px;font-size:14px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;font-family:inherit}
-nav button.on{color:var(--title);border-bottom-color:var(--title);font-weight:600}
-nav button b{display:inline-block;min-width:20px;padding:0 5px;border-radius:10px;background:var(--badbg);color:var(--bad);font-size:12px;text-align:center}
+nav button{border:0;background:none;padding:11px 16px;font-size:14px;cursor:pointer;color:#fff;font-weight:600;font-family:inherit;border-right:1px solid rgba(255,255,255,.18)}
+nav button:hover{background:rgba(255,255,255,.12)}
+nav button.on{background:#fff;color:var(--brand)}
+nav button b{display:inline-block;min-width:20px;padding:0 5px;border-radius:10px;background:#d93636;color:#fff;font-size:12px;text-align:center}
 nav .sep{width:1px;height:22px;background:var(--line);margin:0 6px}
 main{max-width:1320px;margin:16px auto;padding-block:0;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .desk{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:16px;align-items:start}
 .grid > *,.desk > *{min-width:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;min-width:0}
-.card h2{font-size:16px;margin:0 0 10px;color:var(--title);text-wrap:balance}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 1px 2px rgba(20,40,80,.06);padding:14px 16px;margin-bottom:16px;min-width:0}
+.card h2{font-size:15.5px;margin:0 0 12px;color:var(--title);text-transform:uppercase;padding-bottom:7px;border-bottom:2px solid var(--brand);text-wrap:balance}
 .card h3{font-size:14px;margin:14px 0 6px;color:var(--head-ink)}
 label{display:block;font-size:12.5px;color:var(--muted);margin:7px 0 3px}
 input,select,textarea{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:14px;font-family:inherit;background:var(--field);color:var(--ink)}
@@ -104,7 +90,7 @@ td input,td select{padding:4px 6px;font-size:13px}
 .note{font-size:12.5px;color:var(--muted)}
 .mono{font-family:var(--font-mono)}
 .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:4px;padding:10px 12px}
 .kpi b{display:block;font-size:24px;color:var(--title);font-variant-numeric:tabular-nums}
 .kpi span{font-size:12.5px;color:var(--muted)}
 .kpi.alert b{color:var(--bad)}
@@ -136,9 +122,9 @@ pre{background:var(--code-bg);color:var(--code-ink);padding:10px;border-radius:6
 .term td{padding:3px 4px}
 .view{display:none}.view.show{display:block}
 header{position:relative}
-.modes{display:inline-flex;gap:2px;margin-top:8px;padding:3px;border-radius:8px;background:rgba(255,255,255,.14)}
-.modes button{border:0;background:none;color:var(--on-brand);padding:6px 14px;border-radius:6px;font-size:14px;font-family:inherit;cursor:pointer}
-.modes button.on{background:var(--card);color:var(--title);font-weight:600}
+.modes{display:inline-flex;gap:2px;margin-top:10px;padding:3px;border-radius:6px;background:#e6ecf5;border:1px solid var(--line)}
+.modes button{border:0;background:none;color:var(--brand);font-weight:600;padding:6px 14px;border-radius:6px;font-size:14px;font-family:inherit;cursor:pointer}
+.modes button.on{background:var(--brand);color:#fff}
 .steps{list-style:none;display:flex;gap:8px;padding:0;margin:0 0 12px;flex-wrap:wrap}
 .steps li{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13.5px}
 .steps li b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--btn-sec);color:var(--ink);font-size:12px}
@@ -176,7 +162,7 @@ td .btn.sm{margin-top:4px}
 <header>
   <h1>Cổng Khai Báo Một Lần cho sà lan (KBML)</h1>
   <div class="sub">Khai báo và cấp phép vào, rời cho phương tiện thủy nội địa – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
-  <div class="modes" id="modes" role="group" aria-label="Chế độ sử dụng"><button data-mode="dan">Người dân khai báo</button><button data-mode="cv" class="on">Cảng vụ duyệt</button></div>
+  <div class="modes" id="modes" hidden><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Cảng vụ duyệt</button></div>
 </header>
 <div class="demo"><b>Bản mẫu trong báo cáo thực tập của sinh viên, dùng dữ liệu giả.</b> Đây không phải hệ thống chính thức của Cảng vụ Hàng hải TP.HCM hay cơ quan đăng kiểm. Giấy tờ và giấy phép hiển thị trên trang chỉ là bản mô phỏng, không có giá trị pháp lý.</div>
 <nav id="tabs">
@@ -190,7 +176,7 @@ td .btn.sm{margin-top:4px}
 <main>
 
 <!-- ================= HỒ SƠ CẦN XỬ LÝ ================= -->
-<section id="t-hoso" class="view show">
+<section id="t-hoso" class="view">
   <div class="kpis" id="kpis"></div>
   <div class="desk">
     <div class="card">
@@ -560,8 +546,8 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ const t=b.d
 document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{ const t=b.dataset.mode==="cv"?"hoso":"kb", n=nameOf(t); showTab(t); try{ if(location.hash.slice(1)!==n){ skipHash=n; location.hash=n; } }catch(e){} });
 window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(h&&h===skipHash){ skipHash=null; return; } skipHash=null; routeHash(); });
 function routeHash(){ const h=location.hash.slice(1);
-  if(h.includes("=")){ const p=new URLSearchParams(h); showTab(p.get("tab")||"hoso"); if(p.get("sel")){ sel=p.get("sel"); renderDesk(); } if(p.get("f")){ $("q-f").value=p.get("f"); renderDesk(); } if(p.get("so")){ const x=S.dos.filter(d=>d.so===p.get("so")&&($("q-f").value==="capphep"?d.status==="capphep":d.status==="cho"))[0]; if(x){ sel=x.id; renderDesk(); } } if(p.get("v")){ tcSel=p.get("v"); renderTC(); } if(p.get("my")){ $("my-s").value=p.get("my"); ownList(); } if(p.get("demo")) $("scan-demo").click(); if(p.get("pdf")) openPdf(p.get("pdf").replace("@",sel)); return; }
-  showTab(VIEWS[h]||"hoso"); }
+  if(h.includes("=")){ const p=new URLSearchParams(h); showTab(GROUP[p.get("tab")]==="dan"?p.get("tab"):"kb"); if(p.get("sel")){ sel=p.get("sel"); renderDesk(); } if(p.get("f")){ $("q-f").value=p.get("f"); renderDesk(); } if(p.get("so")){ const x=S.dos.filter(d=>d.so===p.get("so")&&($("q-f").value==="capphep"?d.status==="capphep":d.status==="cho"))[0]; if(x){ sel=x.id; renderDesk(); } } if(p.get("v")){ tcSel=p.get("v"); renderTC(); } if(p.get("my")){ $("my-s").value=p.get("my"); ownList(); } if(p.get("demo")) $("scan-demo").click(); if(p.get("pdf")) openPdf(p.get("pdf").replace("@",sel)); return; }
+  showTab(VIEWS[h]&&GROUP[VIEWS[h]]==="dan"?VIEWS[h]:"kb"); }
 function copyText(btn,txt,el){ const pick=()=>{ try{ if(el&&el.select){ el.select(); } else if(el){ const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); } }catch(e){} };
   try{ navigator.clipboard.writeText(txt).then(()=>{ btn.textContent="Đã chép"; },()=>{ pick(); btn.textContent="Nhấn Ctrl+C"; }); }catch(e){ pick(); btn.textContent="Nhấn Ctrl+C"; } }
 
