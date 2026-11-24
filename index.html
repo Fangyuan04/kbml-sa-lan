@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cổng Khai Báo Một Lần</title>
+<title>Cổng khai báo thông tin một lần</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Bố cục: bàn làm việc của chuyên viên Cảng vụ: hàng đợi bên trái, hồ sơ đang xử lý bên phải.
@@ -160,7 +160,7 @@ td .btn.sm{margin-top:4px}
 </head>
 <body>
 <header>
-  <h1>Cổng Khai Báo Một Lần cho sà lan (KBML)</h1>
+  <h1>Cổng khai báo thông tin một lần Phương tiện thủy nội địa (sà lan)</h1>
   <div class="sub">Khai báo vào, rời cảng của sà lan để Cảng vụ theo dõi – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
   <div class="modes" id="modes" role="group" aria-label="Chế độ sử dụng"><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Theo dõi hồ sơ</button></div>
 </header>
@@ -778,7 +778,7 @@ async function drawPaper(sp){ const W=1240,PH=1754,M=104,CW=W-2*M,LW=400,pages=[
     const row=(cells,head)=>{ g.font=font(30,head); const ls=cells.map((t,i)=>wrap(t===""?"–":t,T.w[i]*CW-24)), h=Math.max(...ls.map(l=>l.length))*40+22; need(h); if(head){ g.fillStyle="#eef2f7"; g.fillRect(M,y,CW,h); }
       g.strokeStyle="#9aa8b8"; g.lineWidth=1.5; g.strokeRect(M,y,CW,h); xs.slice(1).forEach(a=>{ g.beginPath(); g.moveTo(a,y); g.lineTo(a,y+h); g.stroke(); }); g.fillStyle="#14202e"; g.font=font(30,head); ls.forEach((l,i)=>l.forEach((t,j)=>g.fillText(t,xs[i]+12,y+40+j*40))); y+=h; };
     row(T.head,true); T.rows.forEach(r=>row(r.map(String))); }
-  pages.forEach((p,i)=>{ const x=p.getContext("2d"); x.save(); x.translate(W/2,PH/2); x.rotate(-Math.PI/5); x.globalAlpha=.1; x.fillStyle="#a12a2a"; x.font=font(150,true); x.textAlign="center"; [-560,0,560].forEach(d=>x.fillText("BẢN MÔ PHỎNG",0,d)); x.restore(); x.fillStyle="#5d6b7a"; x.font=font(25); x.textAlign="left"; x.fillText("Cổng Khai Báo Một Lần – bản mẫu trong báo cáo thực tập của sinh viên",M,PH-62); x.textAlign="right"; x.fillText(`Trang ${i+1}/${pages.length}`,W-M,PH-62); });
+  pages.forEach((p,i)=>{ const x=p.getContext("2d"); x.save(); x.translate(W/2,PH/2); x.rotate(-Math.PI/5); x.globalAlpha=.1; x.fillStyle="#a12a2a"; x.font=font(150,true); x.textAlign="center"; [-560,0,560].forEach(d=>x.fillText("BẢN MÔ PHỎNG",0,d)); x.restore(); x.fillStyle="#5d6b7a"; x.font=font(25); x.textAlign="left"; x.fillText("Cổng khai báo thông tin một lần – bản mẫu trong báo cáo thực tập của sinh viên",M,PH-62); x.textAlign="right"; x.fillText(`Trang ${i+1}/${pages.length}`,W-M,PH-62); });
   return Promise.all(pages.map(p=>canvasJpeg(p,.86))); }
 // Tìm giấy tờ theo mã trên nút bấm
 function resolvePdf(spec){ const [t,a,b]=String(spec).split("|");
