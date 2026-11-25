@@ -161,10 +161,10 @@ td .btn.sm{margin-top:4px}
 <body>
 <header>
   <h1>Cổng khai báo thông tin một lần Phương tiện thủy nội địa (sà lan)</h1>
-  <div class="sub">Khai báo vào, rời cảng của sà lan để Cảng vụ theo dõi – khu vực Đại diện Cần Giờ – bản mẫu cho Chương 3</div>
+  <div class="sub">Khu vực Đại diện Cần Giờ · Bản mẫu</div>
   <div class="modes" id="modes" role="group" aria-label="Chế độ sử dụng"><button data-mode="dan" class="on">Người dân khai báo</button><button data-mode="cv">Theo dõi hồ sơ</button></div>
 </header>
-<div class="demo"><b>Bản mẫu trong báo cáo thực tập của sinh viên, dùng dữ liệu giả.</b> Đây không phải hệ thống chính thức của Cảng vụ Hàng hải TP.HCM hay cơ quan đăng kiểm. Giấy tờ hiển thị trên trang chỉ là bản mô phỏng, không có giá trị pháp lý.</div>
+<div class="demo">Bản mẫu của sinh viên · Dữ liệu mô phỏng · Không có giá trị pháp lý</div>
 <nav id="tabs">
   <button data-t="hoso" data-g="none" hidden>Hồ sơ cần xử lý <b id="n-hoso">0</b></button>
   <button data-t="my" data-g="cv" hidden>Hồ sơ đã gửi</button>
@@ -223,8 +223,8 @@ td .btn.sm{margin-top:4px}
       <div class="legend"><span><i style="background:var(--s1)"></i>Vào cảng</span><span><i style="background:var(--s2)"></i>Rời cảng</span></div>
       <div class="chart" id="chart"></div>
       <details><summary class="note">Bảng số liệu</summary><div id="chart-table" class="tw"></div></details>
-      <p class="note">Tính theo các khai báo vào, rời đã ghi nhận; hôm nay gồm cả lượt dự kiến.</p>
-      <p class="note"><b>Số liệu mô phỏng:</b> web Cảng vụ không công bố lượt sà lan. Quy mô khoảng 100 lượt vào mỗi ngày được ước từ 12.292 lượt vào thuộc Đại diện Cần Giờ trên hệ thống của Cục, giả định tính từ 01/7/2026.</p>
+      <p class="note">Hôm nay gồm cả lượt dự kiến.</p>
+      <p class="note">Dữ liệu mô phỏng.</p>
     </div>
     <div class="card">
       <h2>Hàng hóa thông qua 7 ngày gần nhất</h2>
@@ -241,8 +241,8 @@ td .btn.sm{margin-top:4px}
   <div id="kenh-note"></div>
 
   <div id="s1" class="card">
-    <h2>Đưa giấy tờ vào, AI đọc và điền thay bạn</h2>
-    <label class="drop" id="drop" for="scan-file"><b>Chọn ảnh hoặc file PDF giấy tờ</b><span class="note">Có thể chọn nhiều file: bản khai chung, danh sách thuyền viên, giấy phép rời cảng, bến thủy nội địa, giấy chứng nhận bảo hiểm, giấy chứng nhận đăng ký, giấy chứng nhận an toàn kỹ thuật và bảo vệ môi trường</span>
+    <h2>Đưa giấy tờ vào</h2>
+    <label class="drop" id="drop" for="scan-file"><b>Chọn ảnh hoặc file PDF giấy tờ</b><span class="note">Chọn được nhiều file</span>
       <input id="scan-file" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf"></label>
     <div id="scan-list"></div>
     <div id="scan-status" class="note" role="status"></div>
@@ -252,13 +252,13 @@ td .btn.sm{margin-top:4px}
       <button class="btn sec" id="scan-demo">Xem thử với giấy tờ mẫu</button>
       <button class="btn sec" id="scan-manual">Tự nhập, không dùng AI</button>
     </div>
-    <p class="note">Ảnh giấy tờ được gửi tới Claude để đọc nội dung. Giấy tờ có thông tin cá nhân của thuyền viên, nên chỉ đưa vào giấy tờ của phương tiện bạn được quyền khai báo. AI có thể đọc sai: bạn cần kiểm tra lại trước khi gửi.</p>
+    <p class="note">AI có thể đọc sai, hãy kiểm tra trước khi gửi.</p>
   </div>
 
   <div id="s2" class="card" hidden>
-    <div class="acts" style="margin:0 0 8px;justify-content:space-between"><h2 style="margin:0">Kiểm tra thông tin trước khi gửi</h2><button class="btn sec sm" id="s2-back">Quay lại quét giấy tờ</button></div>
+    <div class="acts" style="margin:0 0 8px;justify-content:space-between"><h2 style="margin:0">Kiểm tra thông tin</h2><button class="btn sec sm" id="s2-back">Quay lại</button></div>
     <div id="ai-sum"></div>
-    <div class="tabs2" id="mode"><button data-m="den" class="on">Đến cảng</button><button data-m="roi">Rời cảng (sau khi làm hàng quá ngày)</button></div>
+    <div class="tabs2" id="mode"><button data-m="den" class="on">Đến cảng</button><button data-m="roi">Rời cảng</button></div>
 
     <h3>Phương tiện</h3>
     <div class="row3">
@@ -322,7 +322,7 @@ td .btn.sm{margin-top:4px}
     <div class="acts"><button class="btn sec sm" id="v-addcrew">+ Thêm thuyền viên</button></div>
 
     <h3>Kết quả kiểm tra</h3><div id="k-check"></div>
-    <div class="acts"><label class="chk" for="k-confirm"><input type="checkbox" id="k-confirm"> Tôi đã đối chiếu thông tin trên với giấy tờ gốc và chịu trách nhiệm về nội dung khai báo</label></div>
+    <div class="acts"><label class="chk" for="k-confirm"><input type="checkbox" id="k-confirm"> Tôi đã đối chiếu với giấy gốc</label></div>
     <div class="acts"><button class="btn" id="k-send" disabled>Gửi hồ sơ cho Cảng vụ</button></div>
     <div id="k-msg"></div>
   </div>
@@ -418,7 +418,7 @@ function docRows(d){
   const v=vessel(d.so), r=[], vd=k=>(v&&v.docs[k])||{}, td=k=>(d.docs&&d.docs[k])||{};
   const add=(key,name,scope,val,withHan,why)=>r.push({key,name,scope,val,withHan,why});
   if(hasDen(d)) add("gprc","Giấy phép rời cảng, bến thủy nội địa","chuyen",td("gprc"),false,"Do cảng, bến rời cuối cùng cấp");
-  add("baohiem","Giấy chứng nhận bảo hiểm","tau",vd("baohiem"),true,"Bảo hiểm thân tàu, trách nhiệm dân sự chủ tàu, tai nạn thuyền viên");
+  add("baohiem","Giấy chứng nhận bảo hiểm","tau",vd("baohiem"),true,"Bắt buộc");
   add("dangky","Giấy chứng nhận đăng ký phương tiện thủy nội địa","tau",vd("dangky"),false,"Bắt buộc");
   add("dangkiem","Giấy chứng nhận an toàn kỹ thuật và bảo vệ môi trường phương tiện thủy nội địa","tau",vd("dangkiem"),true,"Bắt buộc");
   return r;
@@ -652,7 +652,7 @@ function renderKV(){
   $("present").querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>copyText(b,b.dataset.copy,$(b.dataset.el)));
   const c={}; pres.forEach(p=>p.d.ben.split(" + ").forEach(b=>c[b]=(c[b]||0)+1));
   const e=Object.entries(c).sort((a,b)=>b[1]-a[1]);
-  $("by-ben").innerHTML=e.length?`<table><tr><th>Vị trí</th><th class="n">Đang có mặt</th></tr>${e.map(([b,n])=>`<tr><td>${esc(b)}</td><td class="n"><b>${n}</b></td></tr>`).join("")}</table><p class="note">Sà lan làm hàng ở nhiều bến được tính ở mỗi bến.</p>`:`<p class="note">Không có dữ liệu.</p>`;
+  $("by-ben").innerHTML=e.length?`<table><tr><th>Vị trí</th><th class="n">Đang có mặt</th></tr>${e.map(([b,n])=>`<tr><td>${esc(b)}</td><td class="n"><b>${n}</b></td></tr>`).join("")}</table><p class="note">Sà lan ở nhiều bến được tính ở mỗi bến.</p>`:`<p class="note">Không có dữ liệu.</p>`;
   const s=S.dos.filter(d=>hasDen(d)&&d.status!=="tuchoi"&&d.t>now&&d.t<=now+D&&inKV(d.ben,kv)).sort((a,b)=>a.t-b.t);
   $("soon").innerHTML=s.length?`<table><tr><th>Sà lan</th><th>Vị trí</th><th>Giờ đến</th><th>Hồ sơ</th></tr>${s.map(d=>`<tr><td class="mono">${d.so}</td><td>${esc(d.ben)}</td><td>${fmt(d.t)}</td><td>${stChip(d)}</td></tr>`).join("")}</table>`:`<p class="note">Không có sà lan sắp đến.</p>`;
 }
@@ -829,7 +829,7 @@ function formVessel(){ const n=norm($("v-so").value); if(!n) return null;
     reg:{ten:$("v-ten").value.trim(),cap:$("v-cap").value,loai:$("v-loai").value,dwt:Number($("v-dwt").value)||0,gt:Number($("v-gt").value)||0,teu:Number($("v-teu").value)||0},
     docs:Object.fromEntries(VDOCS.map(([k])=>[k,draftDocs[k]||{}])),crew:draftCrew.filter(c=>c.ten.trim())}; }
 function loadVessel(){ const n=norm($("v-so").value), old=S.vessels.find(v=>v.so===n), r=REG[n];
-  $("v-norm").innerHTML=!n?"":`Chuẩn hóa thành <b class="mono">${esc(n)}</b>${old?' <span class="chip c-ok">đã có hồ sơ, thông tin được điền lại</span>':r?' <span class="chip c-info">khớp dữ liệu đăng kiểm (giả lập)</span>':""}`;
+  $("v-norm").innerHTML=!n?"":`Chuẩn hóa thành <b class="mono">${esc(n)}</b>${old?' <span class="chip c-ok">đã có hồ sơ</span>':r?' <span class="chip c-info">có trong dữ liệu đăng kiểm</span>':""}`;
   const src=old?old.reg:r; if(src){ $("v-cap").value=src.cap; $("v-loai").value=src.loai; $("v-dwt").value=src.dwt; $("v-gt").value=src.gt; $("v-teu").value=src.teu||""; if(!$("v-ten").value) $("v-ten").value=src.ten; }
   if(old){ $("v-ten").value=old.ten; $("v-chu").value=old.chu; $("v-dc").value=old.dc; $("v-dt").value=old.dt; $("v-mail").value=old.mail; $("v-mmsi").value=old.mmsi; $("v-zalo").checked=old.zalo; $("v-nh").checked=old.nganhang; draftDocs=JSON.parse(JSON.stringify(old.docs)); draftCrew=JSON.parse(JSON.stringify(old.crew)); crewForm(); } }
 function crewForm(){ $("v-crew").innerHTML=`<table class="wide"><tr><th>Họ tên</th><th style="width:130px">Chức danh</th><th style="width:170px">Số bằng, giấy chứng nhận</th><th style="width:230px">Chứng chỉ</th></tr>${draftCrew.map((c,i)=>`<tr><td><input id="cw-${i}-ten" class="${c.ai?"ai":""}" data-i="${i}" data-f="ten" value="${esc(c.ten)}" aria-label="Họ tên"></td><td><select id="cw-${i}-cd" data-i="${i}" data-f="cd" aria-label="Chức danh">${["Thuyền trưởng","Máy trưởng","Thợ máy","Thủy thủ"].map(o=>`<option ${o===c.cd?"selected":""}>${o}</option>`).join("")}</select></td><td><input id="cw-${i}-bang" class="${c.ai&&c.bang?"ai":""}" data-i="${i}" data-f="bang" value="${esc(c.bang)}" aria-label="Số chứng chỉ"></td><td>${hasPdf(c)?pdfLink("dcrew|"+i,certName(c))+"<br>":`<span class="note">${certName(c)}</span><br>`}${attBtn("dcrew|"+i,c)}</td></tr>`).join("")}</table>`;
@@ -855,12 +855,12 @@ function kCheck(keepDocs){ if($("s2").hidden) return; draftV=formVessel();
     if(mode==="roi"){ const so=norm($("v-so").value), list=presence(Date.now()+D).filter(p=>p.d.so===so&&p.d.kind==="DEN"), cur=$("k-den").value; $("k-den").innerHTML=list.length?list.map(p=>`<option value="${p.d.id}">${p.d.id} – ${esc(p.d.ben)}, đến ${fmt(p.d.t)}</option>`).join(""):'<option value="">(chưa có hồ sơ đến đang mở)</option>'; if(list.some(p=>p.d.id===cur)) $("k-den").value=cur; }
     const d=kDraft(), e=[]; if(!draftV) e.push("số đăng ký"); else { if(!draftV.ten) e.push("tên phương tiện"); if(!draftV.reg.cap) e.push("cấp đăng kiểm"); if(!draftV.chu) e.push("chủ phương tiện"); if(!/^0\d{9}$/.test(draftV.dt)) e.push("điện thoại thuyền trưởng 10 số"); }
     if(isNaN(d.t)||(mode==="den"&&isNaN(d.tr))) e.push("thời gian");
-    $("k-kind").innerHTML=mode==="den"&&!isNaN(d.t)&&!isNaN(d.tr)?`<div class="msg c-info">${d.kind==="DENROI"?"<b>Làm hàng trong ngày:</b> một hồ sơ làm thủ tục đến và rời cùng lúc.":"<b>Làm hàng quá ngày:</b> làm thủ tục đến trước, khi rời làm thủ tục rời riêng."}</div>`:"";
+    $("k-kind").innerHTML=mode==="den"&&!isNaN(d.t)&&!isNaN(d.tr)?`<div class="msg c-info">${d.kind==="DENROI"?"<b>Trong ngày:</b> khai đến và rời một lần.":"<b>Quá ngày:</b> khi rời khai riêng."}</div>`:"";
     $("k-xep-box").hidden=mode==="den"&&d.kind==="DEN";
     if(!draftV||isNaN(d.t)){ $("k-docs").innerHTML=`<p class="note">Nhập số đăng ký và thời gian để hiện danh sách giấy tờ cần nộp.</p>`; $("k-check").innerHTML=`<span class="chip c-bad">Còn thiếu: ${e.join(", ")}</span>`; $("k-send").disabled=true; return; }
     if(!keepDocs) kDocs(d);
     const w=issues(d); if(mode==="den"&&d.tr<=d.t) w.push(["bad","Dự kiến rời phải sau thời gian đến"]); if(e.length) w.unshift(["bad","Còn thiếu: "+e.join(", ")]);
-    $("k-check").innerHTML=chips(w)+(w.some(x=>/: thiếu|hết hạn/.test(x[1]))?`<p class="note">Vẫn gửi được khi thiếu giấy tờ; Cảng vụ có thể kiểm tra sau.</p>`:"");
+    $("k-check").innerHTML=chips(w)+(w.some(x=>/: thiếu|hết hạn/.test(x[1]))?`<p class="note">Vẫn gửi được khi thiếu giấy tờ.</p>`:"");
     const block=e.length||w.some(x=>x[0]==="bad"&&/Cấp |vượt|Trùng|sau thời gian/.test(x[1])); $("k-send").disabled=!!block||!$("k-confirm").checked;
   } finally { draftV=null; }
 }
@@ -876,7 +876,7 @@ function resetForm(o={}){ document.querySelectorAll("#s2 input:not([type=checkbo
 $("k-send").onclick=()=>{ const v=formVessel(); draftV=v; const d=kDraft(); draftV=null; delete d.id; const clean=o=>{ if(o) delete o.ai; }; Object.values(v.docs).forEach(clean); v.crew.forEach(clean); Object.values(d.docs).forEach(clean);
   const old=S.vessels.find(x=>x.so===v.so); if(old) Object.assign(old,v); else S.vessels.push(v); if(scanMeta) d.ai=scanMeta; const r=addDos(d); issue(r,Date.now());
   log("tiếp nhận",`Hồ sơ ${r.id} (${r.so}) – ${KIND[r.kind]} – ${r.kenh}${r.ai?" – có dùng AI đọc giấy tờ":""}`,{ma_ho_so:r.id,so_dang_ky:r.so,thu_tuc:KIND[r.kind],vi_tri:r.ben,thoi_gian:new Date(r.t).toISOString(),ai:r.ai||null}); sel=r.id; save();
-  $("s3").innerHTML=`<h2>Đã gửi hồ sơ ${r.id}</h2><p>Hồ sơ của sà lan <b class="mono">${r.so}</b> đã chuyển tới ${DV}. Cảng vụ đã nhận được thông tin chuyến này; bạn xem lại ở mục Hồ sơ đã gửi.</p><div class="acts"><button class="btn" id="s3-my">Theo dõi hồ sơ</button><button class="btn sec" id="s3-new">Khai chuyến mới</button></div>`;
+  $("s3").innerHTML=`<h2>Đã gửi hồ sơ ${r.id}</h2><p>Hồ sơ của sà lan <b class="mono">${r.so}</b> đã chuyển tới ${DV}. Đã ghi nhận.</p><div class="acts"><button class="btn" id="s3-my">Theo dõi hồ sơ</button><button class="btn sec" id="s3-new">Khai chuyến mới</button></div>`;
   $("s3-my").onclick=()=>{ $("my-s").value=r.so; showTab("my"); }; $("s3-new").onclick=()=>{ goStep(1); }; resetForm(); kenh="Trực tuyến"; kenhNote(); goStep(3); renderDesk(); };
 $("s2-back").onclick=()=>goStep(1); $("scan-manual").onclick=()=>goStep(2);
 
@@ -884,7 +884,7 @@ $("s2-back").onclick=()=>goStep(1); $("scan-manual").onclick=()=>goStep(2);
 function docLinks(d){ const v=vessel(d.so), rows=docRows(d), a=[...rows.filter(r=>hasPdf(r.val)).map(r=>pdfLink(`doc|${d.id}|${r.key}`,r.name)),...(v?v.crew.map((c,i)=>hasPdf(c)?pdfLink(`crew|${d.so}|${i}`,`${certName(c)}: ${c.ten}`):"").filter(Boolean):[]),pdfLink("bkc|"+d.id,"Bản khai chung"),pdfLink("dstv|"+d.id,"Danh sách thuyền viên")], miss=rows.filter(r=>!hasPdf(r.val)).map(r=>r.name);
   return `<div class="plist">${a.join("")}</div>${miss.length?`<p class="note">Chưa có bản PDF: ${miss.map(esc).join(", ")}.</p>`:""}`; }
 function ownList(){ const q=norm($("my-s").value), rows=S.dos.filter(d=>!q||d.so===q).sort((a,b)=>b.created-a.created).slice(0,q?30:8), box=$("own-list");
-  box.innerHTML=(q?"":`<p class="note">Bản mẫu đang hiện 8 hồ sơ mới nhất. Nhập số đăng ký để xem hồ sơ của sà lan bạn.</p>`)+(rows.length?rows.map(d=>`<div class="mycard"><div class="acts" style="margin:0;justify-content:space-between"><b><span class="mono">${d.id}</span> · <span class="mono">${d.so}</span> · ${KIND[d.kind]}</b>${stChip(d)}</div><div class="note">${esc(d.ben)} · ${fmt(d.t)}</div>
+  box.innerHTML=(q?"":`<p class="note">8 hồ sơ mới nhất.</p>`)+(rows.length?rows.map(d=>`<div class="mycard"><div class="acts" style="margin:0;justify-content:space-between"><b><span class="mono">${d.id}</span> · <span class="mono">${d.so}</span> · ${KIND[d.kind]}</b>${stChip(d)}</div><div class="note">${esc(d.ben)} · ${fmt(d.t)}</div>
     ${d.status==="bosung"?`<div class="msg c-warn">${esc(d.note)}</div><div class="tw" data-edit="${d.id}">${docTable(d,"dan")}</div><div class="acts"><button class="btn sm" data-re="${d.id}">Đã bổ sung, gửi lại</button></div>`:""}
     <details><summary class="note">Xem giấy tờ đã nộp (PDF)</summary>${docLinks(d)}</details></div>`).join(""):`<p class="note">Không tìm thấy hồ sơ của số đăng ký này.</p>`);
   box.querySelectorAll("[data-edit]").forEach(el=>bindDocEdits(el,dos(el.dataset.edit),ownList));
@@ -910,8 +910,7 @@ const DEMO_SCAN=[
  {loai:"danh_sach_thuyen_vien",tin_cay:"cao",du_lieu:{thuyen_vien:[{ho_ten:"Thuyền trưởng mẫu 13",chuc_danh:"Thuyền trưởng",so_chung_chi:"T2-1301"},{ho_ten:"Máy trưởng mẫu 13",chuc_danh:"Máy trưởng",so_chung_chi:"M2-1302"},{ho_ten:"Thủy thủ mẫu 13",chuc_danh:"Thủy thủ",so_chung_chi:"TT-1303"}]}},
  {loai:"dang_kiem",tin_cay:"cao",du_lieu:{so_dang_ky:"BTR-9313",cap:"VR-SII",cong_dung:"Chở hàng rời",trong_tai:1205,dung_tich:680,so_giay:"01313/26V50",ngay_het_han:"2027-12-01"}},
  {loai:"dang_ky",tin_cay:"cao",du_lieu:{so_dang_ky:"BTR-9313",so_giay:"313/ĐK"}},
- {loai:"bao_hiem",tin_cay:"thap",khong_ro:["ngay_het_han"],du_lieu:{so_giay:"BH-1313"}},
- {loai:"phieu_xuat_kho",tin_cay:"trung_binh",du_lieu:{so_giay:"PXK-1313",hang_xep:{loai:"Than",tan:1150}}}
+ {loai:"bao_hiem",tin_cay:"thap",khong_ro:["ngay_het_han"],du_lieu:{so_giay:"BH-1313"}}
 ];
 function normHang(s){ const t=String(s||"").normalize("NFC").toLowerCase(); if(!t||/không|\bnil\b/.test(t)) return "Không hàng"; if(/(^|\s)than(\s|$|,)/.test(t)) return "Than"; if(/clinker/.test(t)) return "Clinker"; if(/xi ?măng/.test(t)) return "Xi măng rời"; if(/(^|\s)đá(\s|$|,)/.test(t)) return "Đá xây dựng"; if(/(^|\s)cát(\s|$|,)/.test(t)) return "Cát"; if(/cont|teu/.test(t)) return "Container"; if(/xăng|dầu/.test(t)) return "Xăng dầu"; if(/hóa chất/.test(t)) return "Hóa chất"; if(/quặng/.test(t)) return "Quặng"; if(/ngũ cốc|lúa|ngô|bắp/.test(t)) return "Ngũ cốc"; return "Hàng khác"; }
 function matchBen(s){ const t=String(s||"").toUpperCase().replace(/\s+/g," "), itc=/ITC/.test(t), m=t.match(/\bBP[ .\-_]*0*(\d+)/);
@@ -943,7 +942,7 @@ function applyScan(docs,files,opts={}){ const demo=!!opts.demo; aiMark.clear(); 
     if(!o){ const old=prevCrew.find(same); o=old?{...old}:(!hasList&&draftCrew.find(k=>!k.ten.trim()&&k.cd===cd))||{ten:"",cd,bang:"",han:""}; if(!draftCrew.includes(o)) draftCrew.push(o); }
     o.ten=ten; if(c.chuc_danh) o.cd=cd; if(c.so_chung_chi) o.bang=String(c.so_chung_chi).trim(); const h=cleanDate(c.han); if(h) o.han=h; o.ai=true; scanRes.filled++; return o; };
   list.forEach(x=>{ const v=x.du_lieu&&typeof x.du_lieu==="object"?x.du_lieu:{}, src=DOC_NAME[x.loai], refs=Array.isArray(x._refs)?x._refs:[]; scanRes.kinds.push({name:src,tin:x.tin_cay||"trung_binh"});
-    (Array.isArray(x.khong_ro)?x.khong_ro:[]).forEach(f=>scanRes.unclear.push(`${src}: không đọc rõ ${FIELD_VI[f]||String(f).replace(/_/g," ")}`)); if(x.tin_cay==="thap") scanRes.unclear.push(`${src}: ảnh khó đọc, cần đối chiếu kỹ`); if(!demo&&!refs.length) scanRes.unclear.push(`${src}: chưa xác định được trang, hãy đính kèm lại bản PDF`);
+    (Array.isArray(x.khong_ro)?x.khong_ro:[]).forEach(f=>scanRes.unclear.push(`${src}: không đọc rõ ${FIELD_VI[f]||String(f).replace(/_/g," ")}`)); if(x.tin_cay==="thap") scanRes.unclear.push(`${src}: ảnh mờ`); if(!demo&&!refs.length) scanRes.unclear.push(`${src}: chưa xác định được trang, hãy đính kèm lại bản PDF`);
     setF("v-so",v.so_dang_ky?norm(String(v.so_dang_ky)):"",src,"Số đăng ký",(a,b)=>norm(String(a))===norm(String(b))); setF("v-ten",v.ten_phuong_tien,src,"Tên phương tiện"); setF("v-dwt",toNum(v.trong_tai),src,"Trọng tải",numEq); setF("v-gt",toNum(v.dung_tich),src,"Dung tích",numEq); setF("v-teu",toNum(v.suc_cho_teu),src,"Sức chở TEU",numEq);
     if(/^VR-S(I|II|III|B)$/.test(v.cap||"")) setF("v-cap",v.cap,src,"Cấp đăng kiểm"); if(v.cong_dung){ const c=/cont/i.test(v.cong_dung)?"Chở container":/xăng|dầu/i.test(v.cong_dung)?"Chở xăng dầu":/hóa chất/i.test(v.cong_dung)?"Chở hóa chất":/rời/i.test(v.cong_dung)?"Chở hàng rời":"Chở hàng khô"; setF("v-loai",c,src,"Công dụng"); }
     setF("v-chu",v.chu_phuong_tien,src,"Chủ phương tiện"); setF("v-dc",v.dia_chi_chu,src,"Địa chỉ"); setF("v-mail",v.email_chu,src,"Email"); setF("v-dt",phone(v.dien_thoai_thuyen_truong),src,"Điện thoại thuyền trưởng");
@@ -955,14 +954,14 @@ function applyScan(docs,files,opts={}){ const demo=!!opts.demo; aiMark.clear(); 
     (Array.isArray(v.thuyen_vien)?v.thuyen_vien:[]).forEach(c=>{ const o=addCrew(c); if(o&&x.loai==="chung_chi"){ if(v.so_giay) o.bang=String(v.so_giay).trim(); const h=cleanDate(v.ngay_het_han); if(h) o.han=h; if(refs.length){ o.att=refs; delete o.mau; } } }); });
   if(demo) draftCrew.forEach(c=>{ if(c.ten&&c.bang) c.mau=1; });
   crewForm(); scanMeta={demo,files:files||[],kinds:scanRes.kinds,conflicts:scanRes.conflicts,unclear:scanRes.unclear};
-  $("ai-sum").innerHTML=list.length?`<div class="msg c-info"><b>AI đã đọc ${list.length} giấy tờ và điền ${scanRes.filled} thông tin.</b> Ô tô màu vàng là ô do AI điền, hãy đối chiếu với giấy tờ gốc.<br>${scanRes.kinds.map(k=>`<span class="chip c-${k.tin==="thap"?"bad":k.tin==="cao"?"ok":"warn"}">${esc(k.name)}</span>`).join("")}</div>${scanRes.conflicts.length?`<div class="msg c-bad"><b>Thông tin không khớp giữa các giấy tờ:</b><br>${scanRes.conflicts.map(esc).join("<br>")}</div>`:""}${scanRes.unclear.length?`<div class="msg c-warn"><b>Cần xem lại:</b><br>${scanRes.unclear.map(esc).join("<br>")}</div>`:""}`:`<div class="msg c-warn">AI không nhận ra giấy tờ nào. Bạn có thể tự nhập thông tin.</div>`;
+  $("ai-sum").innerHTML=list.length?`<div class="msg c-info"><b>AI đã đọc ${list.length} giấy tờ, điền ${scanRes.filled} ô.</b> Ô vàng do AI điền.</div>${scanRes.conflicts.length?`<div class="msg c-bad"><b>Không khớp:</b><br>${scanRes.conflicts.map(esc).join("<br>")}</div>`:""}${scanRes.unclear.length?`<div class="msg c-warn"><b>Cần xem lại:</b><br>${scanRes.unclear.map(esc).join("<br>")}</div>`:""}`:`<div class="msg c-warn">AI không đọc được giấy tờ nào.</div>`;
   return scanRes; }
 function renderScanList(){ $("scan-run").disabled=!scanFiles.length||!aiSample; $("scan-list").innerHTML=scanFiles.map((f,i)=>`<div class="sf"><img src="${f.thumb}" alt=""><div><b>${esc(f.name)}</b><br><span class="note">${f.pages.length} trang${f.total>f.pages.length?` (file có ${f.total} trang, chỉ lấy ${f.pages.length} trang đầu)`:""} · ${esc(f.state||"Sẵn sàng")}</span></div><button class="btn sec sm" data-rm="${i}" aria-label="Bỏ ${esc(f.name)}">Bỏ</button></div>`).join("");
   $("scan-list").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ scanFiles.splice(+b.dataset.rm,1); renderScanList(); }); }
 async function addScanFiles(fs){ let bad=0; for(const f of fs){ $("scan-status").textContent=`Đang mở ${f.name}…`; try{ const o=await intakeFile(f); scanFiles.push({id:o.id,name:o.name,total:o.total,thumb:await toData(o.pages[0]),pages:o.pages}); renderScanList(); }catch(err){ bad++; } } $("scan-status").textContent=bad?`Có ${bad} file không mở được. Hãy chọn ảnh JPG, PNG hoặc file PDF khác.`:aiStatus(); }
 $("scan-file").onchange=e=>{ const fs=[...e.target.files]; e.target.value=""; addScanFiles(fs); };
 ["dragover","drop"].forEach(t=>$("drop").addEventListener(t,e=>{ e.preventDefault(); if(t==="drop"&&e.dataTransfer.files.length) addScanFiles([...e.dataTransfer.files]); }));
-function aiStatus(){ return aiSample?"":"Quét bằng AI chỉ chạy khi mở trang này trên claude.ai và đã đăng nhập. Bạn vẫn có thể tự nhập hoặc xem thử với giấy tờ mẫu."; }
+function aiStatus(){ return aiSample?"":"AI chỉ chạy trên claude.ai. Bạn có thể tự nhập hoặc xem thử."; }
 const AI_ERR={not_granted:"Bạn chưa cho phép trang dùng Claude nên không quét được. Hãy tự nhập thông tin.",sampling_disabled:"Tài khoản này không dùng được Claude. Hãy tự nhập thông tin.",images_unavailable:"Nơi đang mở trang không gửi được ảnh cho AI. Hãy tự nhập thông tin.",capability_disabled:"Trang này chưa được bật quét bằng AI. Hãy tự nhập thông tin.",not_declared:"Trang này chưa được bật quét bằng AI. Hãy tự nhập thông tin.",rate_limited:"Đã dùng quá nhiều lượt. Hãy thử lại sau ít phút.",session_expired:"Phiên đăng nhập đã hết. Hãy đăng nhập lại rồi quét.",image_rejected:"Có ảnh không đọc được hoặc quá lớn. Hãy chọn ảnh khác.",invalid_json:"AI trả kết quả không đúng dạng. Hãy bấm quét lại.",empty_completion:"AI chưa trả kết quả. Hãy bấm quét lại.",refused:"AI từ chối đọc các ảnh này. Hãy tự nhập thông tin."};
 $("scan-run").onclick=async()=>{ const pages=scanFiles.flatMap(f=>f.pages.map((blob,p)=>({blob,f,ref:{f:f.id,p,n:f.name}}))), size=Math.min((aiCaps&&aiCaps.maxCount)||6,6), all=[]; aiCtl=new AbortController(); $("scan-run").disabled=true; $("scan-stop").hidden=false; let failed="";
   try{ for(let i=0;i<pages.length;i+=size){ const part=pages.slice(i,i+size); part.forEach(p=>p.f.state="Đang đọc…"); renderScanList(); $("scan-run").disabled=true; $("scan-status").textContent=`AI đang đọc trang ${i+1}–${i+part.length} trên ${pages.length}. Việc này có thể mất khoảng một phút.`;
@@ -972,7 +971,7 @@ $("scan-run").onclick=async()=>{ const pages=scanFiles.flatMap(f=>f.pages.map((b
   aiCtl=null; $("scan-stop").hidden=true; scanFiles.forEach(f=>{ if(f.state==="Đang đọc…") f.state="Chưa đọc"; }); renderScanList(); $("scan-status").textContent=failed;
   if(all.length){ resetForm({keep:true}); goStep(2); applyScan(all,scanFiles.map(f=>f.name)); if(failed) $("ai-sum").insertAdjacentHTML("afterbegin",`<div class="msg c-warn"><b>AI chưa đọc hết giấy tờ.</b> ${esc(failed)} Phần dưới đây là những gì đã đọc được.</div>`); kCheck(); log("AI đọc giấy tờ",`Đọc ${pages.length} trang, nhận ra ${all.length} giấy tờ`,{giay_to:scanRes.kinds,khong_khop:scanRes.conflicts}); save(); } };
 $("scan-stop").onclick=()=>{ if(aiCtl) aiCtl.abort(); };
-$("scan-demo").onclick=()=>{ resetForm({keep:true}); goStep(2); const mau=JSON.parse(JSON.stringify(DEMO_SCAN)); mau[0].du_lieu.thoi_gian_den=li(day0(Date.now())+D+7*H); mau[0].du_lieu.thoi_gian_roi=li(day0(Date.now())+D+16*H); applyScan(mau,["Giấy tờ mẫu (mô phỏng)"],{demo:true}); $("ai-sum").insertAdjacentHTML("afterbegin",`<div class="msg c-warn">Đây là kết quả mô phỏng trên giấy tờ mẫu, chưa gọi AI thật.</div>`); kCheck(); };
+$("scan-demo").onclick=()=>{ resetForm({keep:true}); goStep(2); const mau=JSON.parse(JSON.stringify(DEMO_SCAN)); mau[0].du_lieu.thoi_gian_den=li(day0(Date.now())+D+7*H); mau[0].du_lieu.thoi_gian_roi=li(day0(Date.now())+D+16*H); applyScan(mau,["Giấy tờ mẫu (mô phỏng)"],{demo:true}); $("ai-sum").insertAdjacentHTML("afterbegin",`<div class="msg c-warn">Kết quả mô phỏng, chưa gọi AI.</div>`); kCheck(); };
 (async()=>{ try{ if(window.claude&&claude.use){ const s=await claude.use("sample"); if(s){ const c=await s.limits().catch(()=>null); if(c&&c.images){ aiSample=s; aiCaps=c.images; } } } }catch(e){} $("scan-status").textContent=aiStatus(); renderScanList(); })();
 
 // ------------------------------------------------ nhật ký
