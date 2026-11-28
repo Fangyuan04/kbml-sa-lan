@@ -449,3 +449,31 @@ tbody tr:hover { background: #edf5fb; }
   .table-panel th:last-child, .table-panel td:last-child { position: static; box-shadow: none; }
   .table-scroll-hint, .start-actions, .mobile-role-panel, .certificate-actions { display: none !important; }
 }
+
+/* Ready-to-open simulated certificate PDFs. */
+.certificate-name { display:flex; align-items:center; gap:12px; border:0; padding:4px 0; margin:0; background:transparent; color:#123b57; text-align:left; font:inherit; font-weight:800; line-height:1.35; cursor:pointer; }
+.certificate-name:hover { color:#086c70; text-decoration:underline; text-underline-offset:4px; }
+.certificate-name:focus-visible { outline:3px solid #187a85; outline-offset:5px; border-radius:4px; }
+.certificate-pdf-badge { flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; padding:9px 7px; min-width:45px; border:1px solid #ddb7ac; border-radius:7px; color:#8e3024; background:#fff0eb; font-size:.875rem; font-weight:850; letter-spacing:.04em; }
+.certificate-source-note { font-size:.9375rem !important; line-height:1.6; margin:0 !important; color:#496075 !important; }
+.certificate-simulation-banner { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; padding:13px 16px; margin:0 0 18px; background:#fff6df; border:1px solid #d8bc70; border-radius:8px; color:#674813; font-size:1rem; line-height:1.5; }
+.certificate-simulation-banner strong { font-weight:850; letter-spacing:.03em; }
+.certificate-uploaded-banner { padding:12px 15px; margin:0 0 18px; border:1px solid #b1d4c7; border-radius:8px; background:#edf8f1; color:#1c6047; font-size:1rem; font-weight:800; }
+.certificate-preview-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:16px 0; }
+.certificate-zoom-controls { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.certificate-zoom-controls .btn { min-width:48px; min-height:48px; }
+.certificate-zoom-controls output { min-width:62px; text-align:center; font-size:1rem; font-weight:800; color:#153d57; }
+.certificate-page-count { color:#486074; font-size:1rem; font-weight:750; }
+.certificate-preview.is-document { display:block; padding:18px; height:min(68vh,820px); min-height:320px; background:#e5ebf0; overscroll-behavior:contain; }
+.certificate-paper { margin:0 auto; background:#fff; box-shadow:0 3px 15px #1d344c22; }
+.certificate-preview .certificate-paper img { display:block; width:100%; height:auto; max-width:none; max-height:none; object-fit:initial; }
+@media(max-width:640px) {
+ .certificate-name { gap:10px; }
+ .certificate-simulation-banner { padding:12px; }
+ .certificate-preview.is-document { padding:8px; height:58vh; min-height:280px; }
+ .certificate-preview-tools { align-items:stretch; }
+ .certificate-preview-tools > .btn { width:100%; justify-content:center; }
+ .certificate-zoom-controls { gap:6px; }
+ .certificate-zoom-controls .btn { padding:10px 12px; }
+ .certificate-page-count { width:100%; }
+}

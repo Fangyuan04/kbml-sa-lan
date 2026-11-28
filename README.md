@@ -5,7 +5,7 @@ Bản mẫu nghiên cứu của Nhóm 308, ngành Quản lý hàng hải, phục
 ## Bản cập nhật
 
 - Chữ lớn, đậm và tương phản rõ; nút thao tác thuận tiện trên điện thoại.
-- Hồ sơ phương tiện có mục **Giấy chứng nhận**: thêm/sửa thông tin, đính kèm ảnh hoặc PDF, xem và tải bản chụp.
+- Hồ sơ phương tiện có mục **Giấy chứng nhận**: mở ngay PDF mô phỏng theo từng phương tiện, phóng to/thu nhỏ, tải file PDF; đồng thời giữ chức năng thêm/sửa thông tin và đính kèm bản chụp riêng.
 - Khai báo chuyến, theo dõi hành trình, đối chiếu thông tin và thống kê.
 - OCR Việt/Anh chạy trong trình duyệt; giữ nguyên toàn bộ `vendor/ocr/` và giấy phép đi kèm.
 
@@ -25,7 +25,11 @@ Mở `http://localhost:8080`. Không mở trực tiếp tệp HTML vì ứng d�
 
 ## Xem giấy chứng nhận
 
-Vào **Phương tiện → Giấy chứng nhận**. Nếu chưa có bản chụp, chọn **Tải bản chụp lên**, chọn ảnh/PDF rồi **Lưu giấy chứng nhận**. Dữ liệu mẫu ban đầu chỉ có thông tin mô tả giấy, không kèm giấy tờ thực tế.
+Vào **Phương tiện → Giấy chứng nhận**, bấm tên giấy hoặc **Xem PDF mô phỏng** để mở ngay trong trang. Có sẵn mẫu đăng ký phương tiện, an toàn kỹ thuật và bảo hiểm; giấy khác đã khai cũng có thể tạo bản mô phỏng. Dùng **+ / −** để phóng to, thu nhỏ, **Mở tệp PDF** để xem riêng và **Tải PDF mô phỏng** để lưu file.
+
+Mỗi PDF được tạo từ dữ liệu hiện tại, có nhãn và watermark **MÔ PHỎNG - KHÔNG CÓ GIÁ TRỊ PHÁP LÝ**. Trường chưa khai vẫn để rõ chưa có thông tin. Mẫu giấy chưa được khai chỉ là lựa chọn xem thử, không tự thêm giấy vào hồ sơ hoặc ghi đè dữ liệu.
+
+Nếu đã đính kèm ảnh/PDF và tệp còn trên thiết bị, bấm tên giấy sẽ ưu tiên bản đã tải lên; vẫn có nút mở PDF mô phỏng riêng. Để thêm hoặc thay bản chụp, chọn **Đính kèm bản chụp**, rồi lưu giấy chứng nhận.
 
 ## Dữ liệu và giới hạn
 
