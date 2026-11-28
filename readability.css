@@ -464,6 +464,23 @@ tbody tr:hover { background: #edf5fb; }
 .certificate-zoom-controls .btn { min-width:48px; min-height:48px; }
 .certificate-zoom-controls output { min-width:62px; text-align:center; font-size:1rem; font-weight:800; color:#153d57; }
 .certificate-page-count { color:#486074; font-size:1rem; font-weight:750; }
+.modal.certificate-document-modal { max-width:1200px; height:calc(100dvh - 60px); overflow:hidden; }
+.certificate-document-modal .modal-head,.certificate-document-modal .modal-footer { flex-shrink:0; padding:18px 24px; }
+.certificate-document-modal .modal-body { display:flex; flex-direction:column; flex:1; min-height:0; padding:16px 24px; overflow:auto; }
+.certificate-document-modal .certificate-preview-meta { flex-shrink:0; margin-bottom:0; }
+.certificate-document-modal .certificate-simulation-banner { margin-bottom:8px; padding:9px 12px; }
+.certificate-preview-details summary { cursor:pointer; color:#284a63; font-size:.9375rem; font-weight:750; }
+.certificate-preview-details[open] summary { margin-bottom:8px; }
+.certificate-document-modal .certificate-preview-tools { flex-shrink:0; margin:10px 0; }
+.certificate-document-modal .certificate-page-nav,.certificate-document-modal .certificate-current-page,.certificate-document-modal .modal-body > .modal-copy { flex-shrink:0; }
+.certificate-document-modal .modal-body > .modal-copy { margin-top:8px; font-size:.8125rem; line-height:1.45; }
+.certificate-document-modal .certificate-preview.is-document { flex:1 1 340px; height:auto; min-height:220px; }
+.certificate-template-note { margin:8px 0 0; color:#496075; font-size:.9375rem; line-height:1.5; font-weight:650; }
+.certificate-page-nav { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:end; gap:14px; padding:15px; margin:0 0 12px; background:#f1f6f9; border:1px solid #c6d6e2; border-radius:10px; }
+.certificate-page-nav label { display:flex; flex-direction:column; gap:7px; min-width:0; color:#284a63; font-size:.9375rem; font-weight:800; }
+.certificate-page-nav select { width:100%; min-width:0; min-height:48px; padding:10px 34px 10px 12px; border:1px solid #afc3d3; border-radius:7px; background-color:#fff; color:#123b57; font-size:1rem; font-weight:750; }
+.certificate-page-nav .btn { min-height:48px; }
+.certificate-current-page { margin:0 0 10px; color:#284a63; font-size:1rem; line-height:1.5; font-weight:800; }
 .certificate-preview.is-document { display:block; padding:18px; height:min(68vh,820px); min-height:320px; background:#e5ebf0; overscroll-behavior:contain; }
 .certificate-paper { margin:0 auto; background:#fff; box-shadow:0 3px 15px #1d344c22; }
 .certificate-preview .certificate-paper img { display:block; width:100%; height:auto; max-width:none; max-height:none; object-fit:initial; }
@@ -476,4 +493,12 @@ tbody tr:hover { background: #edf5fb; }
  .certificate-zoom-controls { gap:6px; }
  .certificate-zoom-controls .btn { padding:10px 12px; }
  .certificate-page-count { width:100%; }
+ .certificate-page-nav { grid-template-columns:1fr 1fr; gap:10px; padding:12px; }
+ .certificate-page-nav label { grid-column:1 / -1; grid-row:1; }
+ .certificate-page-nav .btn { justify-content:center; padding:10px; }
+ .certificate-page-nav select { font-size:.9375rem; }
+ .modal.certificate-document-modal { height:calc(100dvh - 20px); }
+ .certificate-document-modal .modal-head,.certificate-document-modal .modal-footer { padding:12px 16px; }
+ .certificate-document-modal .modal-body { padding:12px 16px; }
+ .certificate-document-modal .certificate-preview.is-document { min-height:220px; }
 }

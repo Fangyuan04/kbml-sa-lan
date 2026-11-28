@@ -1,222 +1,147 @@
-/**
- * One-page research certificates, rendered from the current vessel/document data.
- * No network calls, external libraries, real signatures or official seals.
- * The PDF embeds the rendered JPEG so Vietnamese text remains readable on devices
- * without the same fonts. It is a visual reference, not a searchable original.
- */
-
-const PAGE={width:1240,height:1754,pdfWidth:595.276,pdfHeight:841.89,margin:84};
-const COLOR={navy:'#102d48',teal:'#0b7e7b',ink:'#18344a',muted:'#627887',line:'#dce5eb',pale:'#f4f8fa',red:'#963f35',redPale:'#fff5f1'};
-const FONT='Arial, "Noto Sans", "Segoe UI", sans-serif';
-const TYPES={
-  registration:{title:'ĐĂNG KÝ PHƯƠNG TIỆN',tag:'HỒ SƠ ĐĂNG KÝ',note:'Thông tin phục vụ tra cứu và minh họa hồ sơ đăng ký. Bản mô phỏng không chứng minh quyền sở hữu và không thay thế giấy chứng nhận đăng ký phương tiện.'},
-  technical:{title:'AN TOÀN KỸ THUẬT',tag:'HỒ SƠ KỸ THUẬT',note:'Bản mô phỏng chỉ trình bày thông tin đã khai báo. Nội dung này không xác nhận phương tiện đã kiểm định, đạt tiêu chuẩn an toàn hoặc được phép hoạt động.'},
-  insurance:{title:'THÔNG TIN BẢO HIỂM',tag:'HỒ SƠ BẢO HIỂM',note:'Đây là thông tin tham chiếu của giấy tờ bảo hiểm. Phạm vi bảo hiểm, số tiền bảo hiểm và trách nhiệm bồi thường phải được đối chiếu với hợp đồng hoặc giấy tờ gốc.'},
-  other:{title:'GIẤY TỜ THAM CHIẾU',tag:'TÀI LIỆU KHÁC',note:'Bản mô phỏng hỗ trợ xem và đối chiếu dữ liệu đã khai báo. Nội dung không xác nhận tính xác thực, hiệu lực pháp lý hoặc kết quả xử lý của bất kỳ cơ quan nào.'}
-};
-
-function plain(value,fallback='Chưa khai báo') {
+/** Research-only forms drawn locally from current records. No scans, real seals,
+ * signatures, reference-vessel identifiers, inspection results or CDN assets. */
+const PORTRAIT={width:1240,height:1754,pdfWidth:595.276,pdfHeight:841.89};
+const LANDSCAPE={width:1754,height:1240,pdfWidth:841.89,pdfHeight:595.276};
+const SERIF='"Times New Roman", "Noto Serif", "Liberation Serif", serif';
+const SANS='Arial, "Noto Sans", "Liberation Sans", sans-serif';
+const INK='#181818',MUTED='#595959',RED='#a6383b',PINK='#bf477b',BLUE='#244f79';
+const UNKNOWN='Chưa khai báo',UNRECORDED='Chưa ghi nhận';
+function plain(value,fallback=UNKNOWN){
   if(value===null||value===undefined||value==='')return fallback;
   return String(value).normalize('NFC').replace(/[\u0000-\u001f\u007f\u202a-\u202e\u2066-\u2069]/g,' ').replace(/\s+/g,' ').trim()||fallback;
 }
-function classify(type) {
-  const value=plain(type,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase();
-  if(value.includes('dang ky'))return TYPES.registration;
-  if(value.includes('an toan')||value.includes('dang kiem')||value.includes('ky thuat'))return TYPES.technical;
-  if(value.includes('bao hiem'))return TYPES.insurance;
-  return TYPES.other;
-}
-function displayDate(value) {
-  if(!value)return 'Chưa khai báo';
-  const text=String(value).trim();
-  if(/^\d{4}-\d{2}-\d{2}$/.test(text)){
-    const check=new Date(`${text}T00:00:00Z`);
-    if(Number.isFinite(check.getTime())&&check.toISOString().slice(0,10)===text)return text.split('-').reverse().join('/');
-  }
-  // Preserve unusual input as text rather than silently normalizing a wrong date.
+function slug(value,fallback='giay-to'){return plain(value,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase().slice(0,64)||fallback;}
+function kindOf(type){const s=slug(type);if(s.includes('dang-ky'))return 'registration';if(s.includes('an-toan')||s.includes('dang-kiem')||s.includes('ky-thuat'))return 'technical';if(s.includes('bao-hiem'))return 'insurance';return 'other';}
+function date(value){
+  if(!value)return UNKNOWN;const s=String(value).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const d=new Date(`${s}T00:00:00Z`);if(Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===s)return s.split('-').reverse().join('/');}
   return `${plain(value)} (cần đối chiếu)`;
 }
-function displayNumber(value,unit) {
-  if(value===null||value===undefined||value===''||(typeof value==='string'&&!value.trim()))return 'Chưa khai báo';
-  const n=Number(value);
-  if(!Number.isFinite(n)||n<0)return 'Chưa xác minh';
-  return `${new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(n)}${unit?` ${unit}`:''}`;
+function number(value,unit=''){
+  if(value===null||value===undefined||value===''||(typeof value==='string'&&!value.trim())||!['number','string'].includes(typeof value))return UNKNOWN;
+  const n=Number(value);if(!Number.isFinite(n)||n<0)return UNKNOWN;
+  return `${new Intl.NumberFormat('vi-VN',{maximumFractionDigits:3}).format(n)}${unit?` ${unit}`:''}`;
 }
-function slug(value,fallback) {
-  return plain(value,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase().slice(0,64)||fallback;
+function canvasFor(size){let c;if(globalThis.document?.createElement)c=document.createElement('canvas');else if(typeof globalThis.OffscreenCanvas==='function')c=new OffscreenCanvas(size.width,size.height);else throw new Error('Trình duyệt chưa hỗ trợ tạo bản PDF mô phỏng.');c.width=size.width;c.height=size.height;return c;}
+function fitLines(ctx,input,width,maxLines){
+  const full=plain(input),source=full.slice(0,1600),words=[];
+  for(const word of source.split(' ')){if(ctx.measureText(word).width<=width){words.push(word);continue;}let part='';for(const char of word){if(part&&ctx.measureText(part+char).width>width){words.push(part);part=char;}else part+=char;}if(part)words.push(part);}
+  const lines=[];let line='';for(const word of words){const test=line?`${line} ${word}`:word;if(line&&ctx.measureText(test).width>width){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);
+  const clipped=lines.length>maxLines||source.length<full.length,visible=lines.slice(0,maxLines);
+  if(clipped&&visible.length){let last=visible.at(-1);while(last&&ctx.measureText(`${last}…`).width>width)last=last.slice(0,-1);visible[visible.length-1]=`${last}…`;}
+  return {lines:visible,clipped};
 }
-function makeCanvas() {
-  if(globalThis.document?.createElement)return document.createElement('canvas');
-  if(typeof globalThis.OffscreenCanvas==='function')return new OffscreenCanvas(PAGE.width,PAGE.height);
-  throw new Error('Trình duyệt chưa hỗ trợ tạo bản PDF mô phỏng.');
-}
-function setFont(ctx,size=28,weight=400) {ctx.font=`${weight} ${size}px ${FONT}`;}
-
-/** Split oversized tokens as well as normal words; cap every field to its box. */
-function linesWithin(ctx,value,width,maxLines) {
-  const original=plain(value),source=original.slice(0,1600);
-  const tokens=[];
-  for(const word of source.split(' ')){
-    if(ctx.measureText(word).width<=width){tokens.push(word);continue;}
-    let chunk='';
-    for(const char of word){if(chunk&&ctx.measureText(chunk+char).width>width){tokens.push(chunk);chunk=char;}else chunk+=char;}
-    if(chunk)tokens.push(chunk);
+class Sheet{
+  constructor(size,title,sourcePage,font=SERIF){this.size=size;this.title=title;this.sourcePage=sourcePage;this.font=font;this.clipped=false;this.canvas=canvasFor(size);this.ctx=this.canvas.getContext('2d',{alpha:false});if(!this.ctx)throw new Error('Không tạo được khung vẽ PDF.');this.ctx.fillStyle='#fff';this.ctx.fillRect(0,0,size.width,size.height);this.ctx.textBaseline='alphabetic';}
+  text(value,x,y,width,options={}){
+    const {size=24,weight=400,italic=false,color=INK,align='left',maxLines=1,lineHeight=size*1.2,font=this.font}=options,c=this.ctx;
+    c.font=`${italic?'italic ':''}${weight} ${size}px ${font}`;c.fillStyle=color;c.textAlign=align;
+    const r=fitLines(c,value,width,maxLines);this.clipped ||= r.clipped;const tx=align==='center'?x+width/2:align==='right'?x+width:x;
+    r.lines.forEach((line,i)=>c.fillText(line,tx,y+i*lineHeight));c.textAlign='left';return r.lines.length*lineHeight;
   }
-  const lines=[];let line='';
-  for(const word of tokens){const candidate=line?`${line} ${word}`:word;if(line&&ctx.measureText(candidate).width>width){lines.push(line);line=word;}else line=candidate;}
-  if(line)lines.push(line);
-  const truncated=lines.length>maxLines||source.length<original.length;
-  const visible=lines.slice(0,maxLines);
-  if(truncated&&visible.length){let last=visible[visible.length-1];while(last&&ctx.measureText(`${last}…`).width>width)last=last.slice(0,-1);visible[visible.length-1]=`${last}…`;}
-  return {lines:visible,truncated};
-}
-function paragraph(ctx,value,x,y,width,{size=26,weight=400,color=COLOR.ink,lineHeight=32,maxLines=2}={}) {
-  ctx.fillStyle=color;setFont(ctx,size,weight);
-  const result=linesWithin(ctx,value,width,maxLines);
-  result.lines.forEach((line,i)=>ctx.fillText(line,x,y+i*lineHeight));
-  return result.truncated;
-}
-function border(ctx,x,y,width,height,fill='#fff') {
-  ctx.fillStyle=fill;ctx.fillRect(x,y,width,height);
-  ctx.strokeStyle=COLOR.line;ctx.lineWidth=1.5;ctx.strokeRect(x,y,width,height);
-}
-function brandMark(ctx,x,y) {
-  ctx.save();ctx.translate(x,y);ctx.fillStyle='#99dfd5';
-  ctx.beginPath();ctx.moveTo(1,37);ctx.lineTo(59,37);ctx.lineTo(47,55);ctx.lineTo(16,55);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(25,1);ctx.lineTo(25,31);ctx.lineTo(1,31);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(32,10);ctx.lineTo(58,31);ctx.lineTo(32,31);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='#99dfd5';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(0,64);ctx.bezierCurveTo(12,55,18,72,30,64);ctx.bezierCurveTo(42,55,48,72,60,64);ctx.stroke();ctx.restore();
-}
-
-async function renderCertificate(vessel,doc) {
-  const canvas=makeCanvas();canvas.width=PAGE.width;canvas.height=PAGE.height;
-  const ctx=canvas.getContext('2d',{alpha:false});
-  if(!ctx)throw new Error('Không tạo được khung vẽ PDF.');
-  const W=PAGE.width,H=PAGE.height,M=PAGE.margin,CW=W-M*2,type=classify(doc.type);
-  let clipped=false;
-  ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle=COLOR.navy;ctx.fillRect(0,0,W,214);
-  ctx.fillStyle=COLOR.teal;ctx.fillRect(0,207,W,7);
-  brandMark(ctx,M,39);
-  paragraph(ctx,'KBML',M+80,74,420,{size:42,weight:700,color:'#fff',maxLines:1});
-  paragraph(ctx,'CẦN GIỜ  /  NHÓM 308',M+81,104,500,{size:20,weight:600,color:'#b9d6e2',maxLines:1});
-  ctx.fillStyle='#22485f';ctx.fillRect(W-M-264,46,264,51);
-  paragraph(ctx,type.tag,W-M-246,79,232,{size:18,weight:700,color:'#cae9e4',maxLines:1});
-  paragraph(ctx,type.title,M,163,CW,{size:44,weight:700,color:'#fff',maxLines:1});
-  paragraph(ctx,'Bản trình bày từ dữ liệu đang lưu trong KBML',M,193,CW,{size:21,color:'#bfd1de',maxLines:1});
-
-  border(ctx,M,242,CW,96,COLOR.redPale);
-  ctx.fillStyle=COLOR.red;ctx.fillRect(M,242,6,96);
-  paragraph(ctx,'MÔ PHỎNG - KHÔNG CÓ GIÁ TRỊ PHÁP LÝ',M+24,280,CW-48,{size:27,weight:700,color:COLOR.red,maxLines:1});
-  paragraph(ctx,'Không thay thế giấy tờ gốc hoặc xác nhận của cơ quan có thẩm quyền.',M+24,313,CW-48,{size:21,color:COLOR.red,maxLines:1});
-
-  const section=(label,y)=>paragraph(ctx,label,M,y,CW,{size:23,weight:700,color:COLOR.teal,maxLines:1});
-  const field=(label,value,x,y,width,height,opts={})=>{
-    border(ctx,x,y,width,height,opts.fill||'#fff');
-    paragraph(ctx,label,x+22,y+28,width-44,{size:18,weight:600,color:COLOR.muted,maxLines:1});
-    clipped=paragraph(ctx,value,x+22,y+(opts.valueY||62),width-44,{size:opts.size||27,weight:opts.weight||600,color:COLOR.ink,lineHeight:opts.lineHeight||31,maxLines:opts.maxLines||2})||clipped;
-  };
-  section('THÔNG TIN GIẤY TỜ',386);
-  field('Loại giấy tờ',plain(doc.type),M,406,CW*.52,112);
-  field('Số giấy tờ (đã khai báo)',plain(doc.number),M+CW*.52,406,CW*.48,112);
-  field('Ngày cấp (đã khai báo)',displayDate(doc.issuedOn),M,518,CW/2,92,{maxLines:1,size:27});
-  field('Có hiệu lực đến (đã khai báo)',displayDate(doc.expiresOn),M+CW/2,518,CW/2,92,{maxLines:1,size:27});
-
-  section('PHƯƠNG TIỆN THAM CHIẾU',650);
-  field('Tên phương tiện',plain(vessel.name),M,672,CW,112,{size:32,lineHeight:36});
-  field('Số đăng ký phương tiện',plain(vessel.registration),M,784,CW*.62,100);
-  field('Cấp phương tiện',plain(vessel.grade),M+CW*.62,784,CW*.38,100);
-  field('Chủ phương tiện / đơn vị sở hữu',plain(vessel.owner),M,884,CW,126,{size:26,maxLines:3,lineHeight:30,valueY:56});
-  field('Loại phương tiện',plain(vessel.kind),M,1010,CW*.62,100,{size:26});
-  field('Thông tin liên hệ',plain(vessel.phone),M+CW*.62,1010,CW*.38,100,{size:26});
-
-  section('THÔNG SỐ ĐÃ KHAI BÁO',1158);
-  const col=CW/3;
-  field('Chiều dài',displayNumber(vessel.length,'m'),M,1178,col,96,{maxLines:1,size:28});
-  field('Chiều rộng',displayNumber(vessel.width,'m'),M+col,1178,col,96,{maxLines:1,size:28});
-  field('Mớn nước',displayNumber(vessel.draft,'m'),M+col*2,1178,col,96,{maxLines:1,size:28});
-  field('Trọng tải',displayNumber(vessel.capacity,'tấn'),M,1274,col,96,{maxLines:1,size:28});
-  field('Sức chở TEU (nếu có)',displayNumber(vessel.capacityTeu,'TEU'),M+col,1274,col,96,{maxLines:1,size:28});
-  field('MMSI (nếu có)',plain(vessel.mmsi),M+col*2,1274,col,96,{maxLines:1,size:26});
-
-  border(ctx,M,1410,CW,168,COLOR.pale);
-  paragraph(ctx,'MỤC ĐÍCH SỬ DỤNG',M+24,1444,CW-48,{size:20,weight:700,color:COLOR.teal,maxLines:1});
-  paragraph(ctx,type.note,M+24,1480,CW-48,{size:22,lineHeight:31,maxLines:3,color:COLOR.muted});
-
-  // A visual watermark distinguishes a research view from an original document.
-  ctx.save();ctx.translate(W/2,977);ctx.rotate(-Math.PI/7);ctx.globalAlpha=.045;
-  ctx.fillStyle=COLOR.teal;setFont(ctx,148,700);ctx.textAlign='center';ctx.fillText('MÔ PHỎNG',0,0);ctx.restore();
-  paragraph(ctx,'Nguồn: thông tin phương tiện và giấy tờ hiện tại trong bản mẫu KBML.',M,1614,CW,{size:20,color:COLOR.muted,maxLines:1});
-  if(clipped)paragraph(ctx,'Một số trường dài được rút gọn. Xem nội dung đầy đủ trong hồ sơ trên KBML.',M,1644,CW,{size:19,color:COLOR.muted,maxLines:1});
-  ctx.strokeStyle=COLOR.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(M,1676);ctx.lineTo(W-M,1676);ctx.stroke();
-  const generated=new Intl.DateTimeFormat('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
-  paragraph(ctx,`Tạo bản xem: ${generated} (giờ Việt Nam)`,M,1710,CW-150,{size:19,color:COLOR.muted,maxLines:1});
-  ctx.fillStyle=COLOR.muted;setFont(ctx,19,600);ctx.textAlign='right';ctx.fillText('TRANG 1 / 1',W-M,1710);ctx.textAlign='left';
-  return canvas;
-}
-
-async function jpegBlob(canvas) {
-  let blob;
-  if(typeof canvas.convertToBlob==='function')blob=await canvas.convertToBlob({type:'image/jpeg',quality:.94});
-  else blob=await new Promise((resolve,reject)=>{
-    try{canvas.toBlob(result=>result?resolve(result):reject(new Error('Không xuất được ảnh xem trước.')),'image/jpeg',.94);}catch(error){reject(error);}
-  });
-  if(!blob||blob.type!=='image/jpeg')throw new Error('Trình duyệt chưa hỗ trợ xuất ảnh JPEG cho PDF.');
-  return blob;
-}
-function jpegInfo(bytes) {
-  if(bytes[0]!==255||bytes[1]!==216)throw new Error('Ảnh xem trước không phải JPEG hợp lệ.');
-  let offset=2;
-  while(offset+3<bytes.length){
-    if(bytes[offset]!==255){offset++;continue;}
-    while(bytes[offset]===255)offset++;
-    const marker=bytes[offset++];
-    if(marker===217||marker===218)break;
-    if(marker===1||(marker>=208&&marker<=215))continue;
-    const length=(bytes[offset]<<8)|bytes[offset+1];
-    if(length<2||offset+length>bytes.length)break;
-    if(marker>=192&&marker<=207&&![196,200,204].includes(marker)){
-      const info={height:(bytes[offset+3]<<8)|bytes[offset+4],width:(bytes[offset+5]<<8)|bytes[offset+6],channels:bytes[offset+7]};
-      if(bytes[offset+2]!==8||!info.width||!info.height||![1,3].includes(info.channels))break;
-      return info;
-    }
-    offset+=length;
+  rule(x,y,w,{color=INK,width=1.6,dash=[]}={}){const c=this.ctx;c.save();c.strokeStyle=color;c.lineWidth=width;c.setLineDash(dash);c.beginPath();c.moveTo(x,y);c.lineTo(x+w,y);c.stroke();c.restore();}
+  box(x,y,w,h,{color=INK,width=1.6,fill}={}){const c=this.ctx;if(fill){c.fillStyle=fill;c.fillRect(x,y,w,h);}c.strokeStyle=color;c.lineWidth=width;c.strokeRect(x,y,w,h);}
+  field(label,value,x,y,w,options={}){
+    const {size=24,maxLines=1,lineHeight=size*1.2,labelWidth,font=this.font}=options,c=this.ctx;c.font=`400 ${size}px ${font}`;
+    const lw=labelWidth??Math.min(c.measureText(`${label}: `).width,w*.62);this.text(`${label}:`,x,y,lw,{size,font});this.rule(x+lw+4,y+5,w-lw-4,{color:'#999',width:1,dash:[1.2,3.8]});
+    const v=plain(value);this.text(v,x+lw+8,y,w-lw-12,{size,font,weight:v===UNKNOWN||v===UNRECORDED?400:700,italic:v===UNKNOWN||v===UNRECORDED,color:v===UNKNOWN||v===UNRECORDED?MUTED:INK,maxLines,lineHeight});
   }
-  throw new Error('Không đọc được kích thước ảnh JPEG.');
+  heading(title,x,y,w,size=25){this.text(title,x,y,w,{size,weight:700,align:'center'});}
+  checkbox(label,x,y,w,size=21){this.text(label,x,y,w-26,{size});this.box(x+w-20,y-16,15,15,{width:1.4});}
+  simulation(){this.text('MÔ PHỎNG — KHÔNG CÓ GIÁ TRỊ PHÁP LÝ',48,32,this.size.width-96,{size:20,font:SANS,weight:700,color:RED,align:'center'});}
+  watermark(){const c=this.ctx;c.save();c.translate(this.size.width/2,this.size.height*.54);c.rotate(-Math.PI/7);c.globalAlpha=.045;c.textAlign='center';c.fillStyle=RED;c.font=`700 ${this.size.width>this.size.height?125:135}px ${SERIF}`;c.fillText('MÔ PHỎNG',0,0);c.restore();}
+  signature(x,y,w,h=150){this.text('Vị trí ký, đóng dấu trên bản gốc',x,y,w,{size:22,weight:700,align:'center',maxLines:2});this.text('(để trống trong bản mô phỏng)',x,y+32,w,{size:21,italic:true,color:MUTED,align:'center',maxLines:2});this.rule(x+35,y+h-20,w-70,{color:'#aaa',width:1,dash:[2,5]});}
+  finish(pageIndex,pageCount){
+    this.watermark();const y=this.size.height-32;if(this.clipped)this.text('Trường dài được rút gọn; xem nội dung đầy đủ trong hồ sơ.',48,y-25,this.size.width-96,{size:16,font:SANS,color:MUTED,align:'center'});
+    this.text(this.sourcePage?`Tham chiếu bố cục hồ sơ Tân Cảng 22, tr. ${this.sourcePage} · Dữ liệu bản mẫu`:'Mẫu thông tin chung · Chưa có biểu mẫu đối chiếu',48,y,this.size.width-210,{size:15,font:SANS,color:MUTED});this.text(`Trang ${pageIndex} / ${pageCount}`,this.size.width-160,y,112,{size:16,font:SANS,color:MUTED,align:'right'});return this;
+  }
 }
-async function imagePdf(preview) {
-  const bytes=new Uint8Array(await preview.arrayBuffer()),info=jpegInfo(bytes),encoder=new TextEncoder();
-  const parts=[],offsets=[0];let length=0;
-  const put=value=>{const data=typeof value==='string'?encoder.encode(value):value;parts.push(data);length+=data.byteLength;};
-  const object=(id,content)=>{offsets[id]=length;put(`${id} 0 obj\n${content}\nendobj\n`);};
-  put('%PDF-1.4\n');put(new Uint8Array([37,226,227,207,211,10]));
-  object(1,'<< /Type /Catalog /Pages 2 0 R >>');
-  object(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
-  object(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE.pdfWidth} ${PAGE.pdfHeight}] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>`);
-  const commands=`q\n${PAGE.pdfWidth} 0 0 ${PAGE.pdfHeight} 0 0 cm\n/Im0 Do\nQ\n`;
-  object(4,`<< /Length ${encoder.encode(commands).byteLength} >>\nstream\n${commands}endstream`);
-  offsets[5]=length;
-  put(`5 0 obj\n<< /Type /XObject /Subtype /Image /Width ${info.width} /Height ${info.height} /ColorSpace ${info.channels===1?'/DeviceGray':'/DeviceRGB'} /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.byteLength} >>\nstream\n`);
-  put(bytes);put('\nendstream\nendobj\n');
-  object(6,'<< /Title (KBML - Research document simulation) /Creator (KBML Can Gio - Group 308) /Producer (KBML browser canvas PDF) >>');
-  const xref=length;
-  put('xref\n0 7\n0000000000 65535 f \n');
-  for(let id=1;id<=6;id++)put(`${String(offsets[id]).padStart(10,'0')} 00000 n \n`);
-  put(`trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
-  return new Blob(parts,{type:'application/pdf'});
+function nationalHeader(p,x,y,w,size=21){p.heading('CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM',x,y,w,size);p.heading('Độc lập - Tự do - Hạnh phúc',x,y+31,w,size);p.rule(x+w*.2,y+39,w*.6,{width:1});}
+function registration(v,d){
+  const p=new Sheet(PORTRAIT,'Giấy chứng nhận đăng ký phương tiện','1');p.simulation();p.box(43,61,1154,1603,{color:PINK,width:2.5});p.box(49,67,1142,1591,{color:PINK,width:.8});
+  p.text('Mẫu số 6 · Bản mô phỏng',839,96,322,{size:24,weight:700,italic:true,align:'right'});p.heading('CƠ QUAN ĐĂNG KÝ PHƯƠNG TIỆN',81,157,445,24);p.heading(UNKNOWN,81,191,445,23);p.heading('* * *',81,225,445,26);nationalHeader(p,576,157,563,23);p.field('Số',d.number,107,285,395,{size:28});
+  p.text('MÔ PHỎNG',390,374,460,{size:45,weight:700,color:RED,align:'center'});p.text('KHÔNG THAY THẾ GIẤY TỜ GỐC',330,410,580,{size:20,font:SANS,color:RED,align:'center'});
+  p.text('GIẤY CHỨNG NHẬN',90,496,1060,{size:43,weight:700,color:PINK,align:'center'});p.text('ĐĂNG KÝ PHƯƠNG TIỆN THỦY NỘI ĐỊA',78,553,1084,{size:40,weight:700,color:PINK,align:'center'});
+  const x=81,w=1078,half=529;
+  p.field('Tên phương tiện',v.name,x,633,647,{size:27});p.field('Số đăng ký',v.registration,x+667,633,411,{size:25});p.field('Chủ phương tiện',v.owner,x,685,w,{size:27,maxLines:2});p.field('Địa chỉ chủ phương tiện',UNKNOWN,x,752,w,{size:26});p.text('Thông tin phương tiện được khai báo như sau:',x,795,w,{size:27});
+  p.field('Cấp phương tiện',v.grade,x,842,half,{size:26});p.field('Công dụng',UNKNOWN,x+549,842,half,{size:26});p.field('Năm và nơi đóng',UNKNOWN,x,889,w,{size:26});
+  p.field('Chiều dài đã khai',number(v.length,'m'),x,936,half,{size:26});p.field('Chiều dài lớn nhất',UNKNOWN,x+549,936,half,{size:25});p.field('Chiều rộng đã khai',number(v.width,'m'),x,983,half,{size:26});p.field('Chiều rộng lớn nhất',UNKNOWN,x+549,983,half,{size:25});
+  p.field('Chiều cao mạn',UNKNOWN,x,1030,half,{size:26});p.field('Chiều chìm đã khai',number(v.draft,'m'),x+549,1030,half,{size:25});p.field('Mạn khô',UNKNOWN,x,1077,half,{size:26});p.field('Vật liệu vỏ',UNKNOWN,x+549,1077,half,{size:26});
+  p.field('Số lượng, kiểu và công suất máy chính',UNKNOWN,x,1124,w,{size:25});p.field('Trọng tải đã khai',number(v.capacity,'tấn'),x,1171,half,{size:26});p.field('Sức chở đã khai',number(v.capacityTeu,'TEU'),x+549,1171,half,{size:26});p.field('Số người được chở; sức kéo, đẩy',UNKNOWN,x,1218,w,{size:25});p.field('Loại phương tiện',v.kind,x,1265,w,{size:25});
+  p.field('Nơi cấp',UNKNOWN,601,1342,535,{size:24});p.field('Ngày cấp',date(d.issuedOn),601,1380,535,{size:24});p.signature(620,1444,510,150);p.text('Kích thước đã khai chưa phân biệt kích thước thiết kế và lớn nhất.',x,1575,540,{size:19,italic:true,color:MUTED,maxLines:2});p.text('Bản dựng theo bố cục hồ sơ tham chiếu; không xác nhận đăng ký hoặc quyền sở hữu.',80,1630,1080,{size:20,italic:true,color:RED,align:'center'});return [p];
 }
-
-/**
- * @param {object} vessel Current vessel record from data.js.
- * @param {object} doc Current paper record: type, number, issuedOn, expiresOn.
- * @returns {Promise<{blob: Blob, previewBlob: Blob, fileName: string, pageCount: 1}>}
- */
-export async function createCertificatePdf(vessel,doc) {
-  if(!vessel||typeof vessel!=='object'||!doc||typeof doc!=='object')throw new Error('Chưa có thông tin phương tiện hoặc giấy tờ để tạo bản mô phỏng.');
-  // Wait for locally available font faces only; this module never requests a font.
-  if(globalThis.document?.fonts?.ready)await document.fonts.ready;
-  const canvas=await renderCertificate(vessel,doc);
-  const previewBlob=await jpegBlob(canvas);
-  const blob=await imagePdf(previewBlob);
-  return {blob,previewBlob,fileName:`KBML_MO-PHONG_${slug(doc.type,'giay-to')}_${slug(vessel.registration||vessel.name,'phuong-tien')}.pdf`,pageCount:1};
+function insurance(v,d){
+  const p=new Sheet(PORTRAIT,'Giấy chứng nhận bảo hiểm phương tiện','2',SANS),c=p.ctx;p.simulation();c.fillStyle='#e8f0f6';c.beginPath();c.moveTo(0,61);c.lineTo(1240,61);c.bezierCurveTo(660,54,500,282,0,310);c.closePath();c.fill();c.strokeStyle='#89b3cc';c.lineWidth=9;c.beginPath();c.moveTo(0,314);c.bezierCurveTo(470,290,625,100,1240,78);c.stroke();
+  p.text('BẢO HIỂM MẪU',74,124,535,{size:47,weight:800,color:BLUE});p.text('INSURANCE · BẢN MÔ PHỎNG',78,158,540,{size:20,weight:700,color:'#966629'});p.text('Đơn vị bảo hiểm: Chưa khai báo',76,193,560,{size:20});p.field('SỐ / No.',d.number,620,184,538,{size:23});p.text('GIẤY CHỨNG NHẬN BẢO HIỂM / CERTIFICATE OF INSURANCE',74,237,1084,{size:22,weight:700,align:'center'});
+  const x=82,w=1076,left=540,rightX=640;
+  const bi=(vi,en,value,fx,y,fw,{size=21,lw=230,maxLines=1}={})=>{p.text(vi,fx,y,lw,{size,weight:700});p.text(en,fx,y+21,lw,{size:16,italic:true});p.text(plain(value),fx+lw+10,y,fw-lw-10,{size,weight:700,maxLines,lineHeight:24});};
+  bi('Người được bảo hiểm','The Assured',v.owner,x,290,w,{lw:247,maxLines:2});bi('Địa chỉ','Address',UNKNOWN,x,351,w,{lw:247});
+  bi('Tên phương tiện','Name of vessel',v.name,x,410,left,{lw:214});bi('Loại phương tiện','Type of vessel',v.kind,rightX,410,518,{lw:201});bi('Năm, nơi đóng','Year / place of built',UNKNOWN,x,466,left,{lw:214});bi('Vật liệu đóng','Hull material',UNKNOWN,rightX,466,518,{lw:201});
+  bi('Trọng tải đã khai','Declared deadweight',number(v.capacity,'tấn'),x,522,left,{lw:214});bi('Số đăng ký','Registration number',v.registration,rightX,522,518,{lw:201});bi('Cấp phương tiện','Classification',v.grade,x,578,left,{lw:214});bi('Phạm vi hoạt động','Trading area',UNKNOWN,rightX,578,518,{lw:201});
+  bi('Ngày cấp giấy tờ','Certificate issue date',date(d.issuedOn),x,634,left,{lw:214});bi('Hiệu lực đến','Expiry date',date(d.expiresOn),rightX,634,518,{lw:201});bi('Giá trị thân tàu','Vessel insured value',UNKNOWN,x,690,left,{lw:214});bi('Bằng chữ','Amount in words',UNKNOWN,rightX,690,518,{lw:201});
+  p.text('Điều kiện bảo hiểm thân tàu / Hull insurance condition:',x,750,732,{size:21,weight:700});p.checkbox('Điều kiện A',819,750,157,20);p.checkbox('Điều kiện B',994,750,157,20);p.text('Quy tắc bảo hiểm / Terms and conditions',x,790,w,{size:21,weight:700});
+  p.checkbox('Bảo hiểm thân tàu / Hull insurance',x+22,828,1048,20);p.checkbox('Bảo hiểm trách nhiệm dân sự chủ tàu / Civil liabilities',x+22,862,1048,20);p.checkbox('Bảo hiểm tai nạn thuyền viên / Crew accident insurance',x+22,896,1048,20);p.text('Chưa khai báo quy tắc, phạm vi và điều khoản bổ sung. Ô trống không xác nhận có / không bảo hiểm.',x,932,w,{size:17,italic:true,color:MUTED,maxLines:2,lineHeight:21});
+  const tableY=980,cols=[238,441,198,199],headH=74,rowH=65,bodyH=headH+rowH*3+45+46;p.box(x,tableY,w,bodyH,{width:2});let cx=x;
+  const labels=[['ĐỐI TƯỢNG BẢO HIỂM','SUBJECT MATTER INSURED'],['SỐ TIỀN BẢO HIỂM / MỨC TRÁCH NHIỆM','SUM INSURED / LIMIT OF LIABILITY'],['PHÍ BẢO HIỂM','PREMIUM'],['THUẾ GTGT','VAT']];
+  cols.forEach((cw,i)=>{p.text(labels[i][0],cx+8,tableY+25,cw-16,{size:19,weight:700,align:'center',maxLines:2,lineHeight:21});p.text(labels[i][1],cx+7,tableY+62,cw-14,{size:13,weight:700,italic:true,align:'center'});cx+=cw;});
+  let bx=x;cols.slice(0,-1).forEach(cw=>{bx+=cw;c.beginPath();c.moveTo(bx,tableY);c.lineTo(bx,tableY+headH+rowH*3+45);c.strokeStyle=INK;c.lineWidth=1.5;c.stroke();});
+  const subjects=[['Thân tàu','Hull insurance'],['TNDS chủ tàu','Civil liabilities'],['Tai nạn thuyền viên','Crew accident insurance']];subjects.forEach((row,i)=>{const yy=tableY+headH+i*rowH;p.rule(x,yy,w);p.text(row[0],x+8,yy+28,cols[0]-16,{size:20,weight:700});p.text(row[1],x+8,yy+51,cols[0]-16,{size:15,italic:true});let xx=x+cols[0];for(let j=1;j<4;j++){p.text(UNKNOWN,xx+7,yy+37,cols[j]-14,{size:20,align:'center'});xx+=cols[j];}});
+  const subtotal=tableY+headH+rowH*3;p.rule(x,subtotal,w);p.text('CỘNG / ADD',x+10,subtotal+30,cols[0]+cols[1]-20,{size:20,weight:700,align:'center'});p.text(UNKNOWN,x+cols[0]+cols[1]+4,subtotal+30,cols[2]-8,{size:19,align:'center'});p.text(UNKNOWN,x+w-cols[3]+4,subtotal+30,cols[3]-8,{size:19,align:'center'});p.rule(x,subtotal+45,w);p.text('TỔNG GIÁ TRỊ THANH TOÁN / TOTAL PAYMENT',x+10,subtotal+76,cols[0]+cols[1]-20,{size:18,weight:700,align:'center'});p.text(UNKNOWN,x+cols[0]+cols[1]+8,subtotal+76,cols[2]+cols[3]-16,{size:21,weight:700,align:'center'});
+  const deductibleY=tableY+bodyH;p.box(x,deductibleY,w,81);p.text('Mức khấu trừ / Deductible',x+12,deductibleY+27,w-24,{size:20,weight:700});p.text('Chưa khai báo. Không suy ra quyền lợi hoặc trách nhiệm bồi thường từ bản mô phỏng.',x+12,deductibleY+56,w-24,{size:18,italic:true});
+  const bottomY=deductibleY+81,bottomH=215;p.box(x,bottomY,w,bottomH);p.box(x,bottomY,w*.49,bottomH);p.text('Bản trình bày sử dụng thông tin giấy tờ đang được khai báo. Doanh nghiệp bảo hiểm, hợp đồng, quyền lợi, số tiền và điều khoản cần được đối chiếu với bản gốc. Không có xác nhận bảo hiểm được phát hành từ bản mô phỏng này.',x+13,bottomY+29,w*.49-26,{size:18,maxLines:6,lineHeight:25});p.field('Ngày cấp / Date',date(d.issuedOn),x+w*.49+19,bottomY+31,w*.51-38,{size:20});p.signature(x+w*.49+24,bottomY+78,w*.51-48,126);return [p];
+}
+function panelTitle(p,title,x,y,w,size=23){p.heading(title,x,y,w,size);}
+function simpleRows(p,items,x,y,w,{size=21,gap=33}={}){items.forEach((item,i)=>p.field(item[0],item[1]??UNKNOWN,x,y+i*gap,w,{size}));return y+items.length*gap;}
+function equipmentChecks(p,items,x,y,w,{gap=31,size=20}={}){const col=(w-22)/2;items.forEach((label,i)=>p.checkbox(label,x+(i%2)*(col+22),y+Math.floor(i/2)*gap,col,size));return y+Math.ceil(items.length/2)*gap;}
+function technicalCertificate(v,d){
+  const p=new Sheet(LANDSCAPE,'Giấy chứng nhận an toàn kỹ thuật và BVMT','5');p.simulation();const y=62,h=1100,x=74,pw=786,rx=894,inner=754,lx=x+16,rr=rx+16;p.box(x,y,pw,h,{width:2});p.box(rx,y,pw,h,{width:2});
+  panelTitle(p,'Trang bị chạy tàu',lx,99,inner,24);equipmentChecks(p,['Ống nhòm','Đồng hồ','Thiết bị đo sâu đơn giản','Chuông lệnh','Thiết bị đo nghiêng','Thước đo mực nước','GPS hoặc thiết bị tương tự','La bàn từ / la bàn chuẩn','Thiết bị truyền thanh chỉ huy','Ra đa','Thiết bị VTD / MF-HF','VHF','S.EPIRB','AIS','SART / AIS-SART','Thiết bị khác'],lx,136,inner,{gap:32,size:21});p.text('Ô trống: chưa có dữ liệu trang bị; không phải kết quả kiểm tra.',lx,402,inner,{size:18,italic:true,color:MUTED});
+  panelTitle(p,'Trang bị ngăn ngừa ô nhiễm',lx,444,inner,24);simpleRows(p,[['Thiết bị phân ly dầu nước'],['Két thu hồi hỗn hợp dầu nước'],['Két nước thải'],['Két lắng / két dầu bẩn'],['Bích nối tiêu chuẩn'],['Thiết bị chứa rác'],['Thiết bị xử lý nước thải']],lx,478,inner,{size:21,gap:32});
+  panelTitle(p,'Thời hạn kiểm tra',lx,728,inner,24);p.field('Định kỳ',UNKNOWN,lx,764,361,{size:21});p.field('Trên đà',UNKNOWN,lx+393,764,361,{size:21});p.field('Hằng năm',UNKNOWN,lx,797,361,{size:21});p.field('Trung gian',UNKNOWN,lx+393,797,361,{size:21});p.rule(lx,817,inner);panelTitle(p,'Áp dụng đối với',lx,848,inner,23);
+  p.text('1. Đối tượng, vùng hoạt động và điều kiện áp dụng trên giấy tờ gốc: chưa khai báo.',lx,884,inner,{size:21,italic:true,maxLines:2,lineHeight:27});p.text('2. Danh mục thiết bị, các giới hạn vận hành và hướng dẫn chuyên môn: chưa có dữ liệu đối chiếu.',lx,949,inner,{size:21,italic:true,maxLines:2,lineHeight:27});panelTitle(p,'Trách nhiệm đối chiếu thông tin',lx,1027,inner,22);p.text('Sử dụng giấy tờ gốc để kiểm tra nội dung và hiệu lực. Bản mô phỏng không chứng nhận trạng thái an toàn kỹ thuật hoặc bảo vệ môi trường.',lx,1062,inner,{size:20,italic:true,maxLines:3,lineHeight:26});
+  panelTitle(p,'CƠ QUAN ĐĂNG KIỂM',rr,95,340,20);panelTitle(p,UNKNOWN,rr,124,340,20);nationalHeader(p,rr+361,95,393,17);p.field('Số',d.number,rr+12,173,343,{size:23});p.text('MÔ PHỎNG',rr+470,178,264,{size:25,weight:700,color:RED,align:'center'});
+  p.text('GIẤY CHỨNG NHẬN AN TOÀN KỸ THUẬT VÀ',rr,225,inner,{size:25,weight:700,align:'center'});p.text('BẢO VỆ MÔI TRƯỜNG PHƯƠNG TIỆN THỦY NỘI ĐỊA',rr,258,inner,{size:24,weight:700,align:'center'});
+  p.field('Tên phương tiện',v.name,rr,305,432,{size:21});p.field('Số ĐKHC',v.registration,rr+447,305,307,{size:20});p.field('Công dụng',UNKNOWN,rr,340,432,{size:21});p.field('Số đăng kiểm',UNKNOWN,rr+447,340,307,{size:20});p.field('Chủ phương tiện',v.owner,rr,375,inner,{size:22,maxLines:2});p.field('Địa chỉ',UNKNOWN,rr,431,inner,{size:21});p.field('Năm và nơi đóng',UNKNOWN,rr,466,inner,{size:21});
+  p.field('Dài × rộng × chìm đã khai',`${number(v.length)} × ${number(v.width)} × ${number(v.draft)} m`,rr,501,inner,{size:21});p.field('Lớn nhất / cao mạn / mạn khô',UNKNOWN,rr,536,inner,{size:21});p.field('Vật liệu',UNKNOWN,rr,571,380,{size:21});p.field('Tổng dung tích (GT)',UNKNOWN,rr+395,571,359,{size:20});p.field('Số máy chính / phụ',UNKNOWN,rr,606,380,{size:20});p.field('Tổng công suất',UNKNOWN,rr+395,606,359,{size:20});p.field('Căn cứ báo cáo kiểm tra số',UNKNOWN,rr,641,inner,{size:21});
+  p.text('KẾT QUẢ KIỂM TRA: CHƯA GHI NHẬN',rr,686,inner,{size:24,weight:700,color:RED,align:'center'});p.text('Bản mô phỏng chỉ trình bày dữ liệu đã khai báo; không xác nhận phương tiện thỏa mãn quy chuẩn, được cấp tàu hoặc được phép hoạt động.',rr,721,inner,{size:21,maxLines:3,lineHeight:27});p.field('Cấp phương tiện đã khai',v.grade,rr,820,inner,{size:23});p.field('Vùng hoạt động',UNKNOWN,rr,855,inner,{size:21});p.field('Trọng tải / sức chở đã khai',`${number(v.capacity,'tấn')} / ${number(v.capacityTeu,'TEU')}`,rr,890,inner,{size:21});p.field('Hạn hiệu lực giấy tờ đã khai',date(d.expiresOn),rr,925,inner,{size:21});p.field('Ngày cấp đã khai',date(d.issuedOn),rr+285,964,469,{size:21});p.signature(rr+230,1004,514,130);p.field('Số kiểm soát',UNKNOWN,rr,1138,355,{size:20});return p;
+}
+function technicalEquipment(v,d){
+  const p=new Sheet(LANDSCAPE,'Phụ lục trang thiết bị phương tiện','4');p.simulation();const x=74,rx=894,y=62,pw=786,h=1100,lx=x+16,rr=rx+16,w=754;p.box(x,y,pw,h,{width:2});p.box(rx,y,pw,h,{width:2});
+  panelTitle(p,'THIẾT BỊ VÀ THÔNG SỐ PHƯƠNG TIỆN',lx,96,w,23);p.text(`Phương tiện: ${plain(v.name)} · Số ĐK: ${plain(v.registration)}`,lx,126,w,{size:19,align:'center'});panelTitle(p,'Thiết kế phương tiện',lx,164,w,23);simpleRows(p,[['Ký hiệu / năm thiết kế'],['Số GCN / số thẩm định'],['Năm và nơi hoán cải']],lx,198,w,{size:21,gap:31});p.rule(lx,279,w);
+  panelTitle(p,'Thiết bị neo',lx,309,w,22);simpleRows(p,[['Neo mũi: kiểu / số lượng / khối lượng'],['Neo đuôi: kiểu / số lượng / khối lượng'],['Xích, cáp neo: chiều dài / đường kính'],['Kiểu tời neo mũi / đuôi']],lx,342,w,{size:21,gap:31});panelTitle(p,'Thiết bị lái',lx,483,w,22);simpleRows(p,[['Bánh lái: kiểu / số lượng / diện tích'],['Máy lái chính / mô men lái'],['Máy lái dự phòng / mô men lái']],lx,515,w,{size:21,gap:31});panelTitle(p,'Thiết bị chằng buộc',lx,621,w,22);simpleRows(p,[['Dây buộc: số lượng / tổng chiều dài'],['Cột buộc: kiểu / số lượng']],lx,653,w,{size:21,gap:31});panelTitle(p,'Thiết bị kéo',lx,727,w,22);simpleRows(p,[['Cột, móc kéo / lực kéo định mức'],['Tời, dây kéo / đường kính / chiều dài']],lx,759,w,{size:21,gap:31});
+  panelTitle(p,'Máy chính',lx,834,w,22);const ty=850,cols=[65,208,133,176,172],titles=['STT','Mác máy','Năm chế tạo','Số chế tạo','Công suất'];let xx=lx;cols.forEach((cw,i)=>{p.box(xx,ty,cw,45);p.text(titles[i],xx+3,ty+27,cw-6,{size:18,weight:700,align:'center'});p.box(xx,ty+45,cw,45);p.text(i===0?'—':UNKNOWN,xx+3,ty+74,cw-6,{size:17,align:'center'});xx+=cw;});panelTitle(p,'Máy phụ / Thiết bị điện',lx,970,w,22);simpleRows(p,[['Máy phụ: số lượng, mác, công suất'],['Máy phát / điện áp / ắc quy']],lx,1003,w,{size:21,gap:31});panelTitle(p,'Hệ thống không khí nén',lx,1080,w,22);p.field('Bình khí nén / máy nén khí',UNKNOWN,lx,1114,w,{size:21});
+  panelTitle(p,'Thiết bị nâng',rr,99,w,23);simpleRows(p,[['Số chế tạo hoặc số quản lý'],['Tầm với lớn nhất / sức nâng'],['Tầm với nhỏ nhất / sức nâng']],rr,133,w,{size:21,gap:31});panelTitle(p,'Trang bị chữa cháy',rr,247,w,23);simpleRows(p,[['Bơm chữa cháy / tổng lưu lượng'],['Loại khí / tổng khối lượng'],['Loại bọt / tổng thể tích'],['Bình bọt / thiết bị tạo bọt xách tay'],['Bình CO₂ / số bình / khối lượng'],['Bình bột / số bình / khối lượng']],rr,281,w,{size:21,gap:31});equipmentChecks(p,['Bộ dụng cụ chữa cháy','Sơ đồ bố trí thiết bị'],rr,476,w,{size:20});panelTitle(p,'Trang bị cứu sinh',rr,525,w,23);simpleRows(p,[['Phao tròn: không dây / có dây'],['Phao áo / phao áo trẻ em'],['Phao bè / xuồng / tổng sức chở']],rr,560,w,{size:21,gap:31});panelTitle(p,'Trang bị cứu đắm',rr,671,w,23);simpleRows(p,[['Bơm hút khô / tổng lưu lượng']],rr,706,w,{size:21});equipmentChecks(p,['Bộ dụng cụ cứu đắm','Tự động báo mức nước'],rr,745,w,{size:20});panelTitle(p,'Trang bị tín hiệu',rr,794,w,23);equipmentChecks(p,['Đèn mạn đỏ','Đèn mạn xanh','Đèn cột trắng','Đèn neo','Đèn lái','Đèn quay / đèn nháy','Đèn cho tín hiệu khác','Đèn dự trữ','Còi / âm hiệu','Vật hiệu ban ngày','Bộ cờ hiệu','Pháo hiệu dù','Đèn tín hiệu cầm tay','Súng phóng dây'],rr,830,w,{gap:32,size:21});p.text('Toàn bộ danh mục thiết bị chưa được kê khai. Ô trống không thể hiện có / thiếu thiết bị hoặc kết quả đạt / không đạt.',rr,1081,w,{size:20,italic:true,color:MUTED,maxLines:2,lineHeight:26});p.text(`Giấy tờ tham chiếu: ${plain(d.number)}`,rr,1140,w,{size:18,italic:true});return p;
+}
+function technicalReport(v,d){
+  const p=new Sheet(PORTRAIT,'Báo cáo kiểm tra kỹ thuật phương tiện','3');p.simulation();p.text('MÔ PHỎNG',84,119,224,{size:27,weight:700,color:RED,align:'center'});p.text('Không phải biên bản kiểm tra đã phát hành',84,151,224,{size:18,italic:true,color:MUTED,align:'center',maxLines:2});p.text('CƠ QUAN KIỂM TRA: CHƯA KHAI BÁO',337,106,820,{size:24,weight:700,align:'center'});p.text('BÁO CÁO KIỂM TRA KỸ THUẬT',337,151,820,{size:34,weight:700,align:'center'});p.text('PHƯƠNG TIỆN THỦY NỘI ĐỊA',337,194,820,{size:32,weight:700,align:'center'});p.field('Số báo cáo',UNKNOWN,88,248,525,{size:23});p.field('Số kiểm soát',UNKNOWN,753,248,399,{size:23});
+  const x=83,y=270,w=1075,bottom=1646,l=x+12,iw=w-24;p.box(x,y,w,bottom-y,{width:2});p.text('1. Thông tin chung',l,302,iw,{size:26,weight:700});
+  p.field('Tên phương tiện',v.name,l,338,644,{size:23});p.field('Vật liệu',UNKNOWN,l+662,338,389,{size:23});p.field('Nơi đăng ký hành chính',UNKNOWN,l,373,644,{size:23});p.field('Số ĐKHC',v.registration,l+662,373,389,{size:22});p.field('Đơn vị đăng kiểm quản lý',UNKNOWN,l,408,644,{size:22});p.field('Số đăng kiểm',UNKNOWN,l+662,408,389,{size:22});p.field('Công dụng',UNKNOWN,l,443,644,{size:23});p.field('Cấp đã khai',v.grade,l+662,443,389,{size:23});p.field('Chủ phương tiện',v.owner,l,478,iw,{size:23,maxLines:2});p.field('Địa chỉ',UNKNOWN,l,533,iw,{size:23});p.field('Đơn vị kiểm tra',UNKNOWN,l,568,iw,{size:23});p.field('Nơi kiểm tra',UNKNOWN,l,603,644,{size:23});p.field('Ngày kiểm tra',UNKNOWN,l+662,603,389,{size:22});
+  p.text('Trạng thái kiểm tra:',l,638,319,{size:23});p.checkbox('Trên đà',l+350,638,225,22);p.checkbox('Trạng thái nổi',l+664,638,368,22);p.text('Nguồn gốc phương tiện:',l,673,332,{size:23});p.checkbox('Đóng mới',l+345,673,207,21);p.checkbox('Hiện có',l+572,673,181,21);p.checkbox('Nhập khẩu',l+773,673,259,21);
+  p.text('2. Thông số cơ bản',l,716,iw,{size:26,weight:700});simpleRows(p,[['Tên / ký hiệu thiết kế'],['Số GCN thẩm định / số thẩm định'],['Năm, nơi đóng / hoán cải']],l,752,iw,{size:23,gap:35});p.field('Dài × rộng × chìm đã khai',`${number(v.length)} × ${number(v.width)} × ${number(v.draft)} m`,l,857,iw,{size:23});p.field('Lớn nhất / chiều cao mạn / mạn khô',UNKNOWN,l,892,iw,{size:23});p.field('Tổng dung tích (GT) / dung tích',UNKNOWN,l,927,iw,{size:23});p.field('Máy chính: mác / số lượng / công suất',UNKNOWN,l,962,iw,{size:23});p.field('Máy phụ: mác / số lượng / công suất',UNKNOWN,l,997,iw,{size:23});
+  p.text('3. Kết quả kiểm tra',l,1040,iw,{size:26,weight:700});p.field('Loại kiểm tra',UNRECORDED,l,1076,iw,{size:23});p.text('Trạng thái kỹ thuật và BVMT:',l,1111,421,{size:22});p.checkbox('Thỏa mãn',l+437,1111,185,21);p.checkbox('Không thỏa mãn',l+644,1111,259,21);p.checkbox('Hạn chế',l+920,1111,115,20);p.field('Kết luận / cấp tàu / xác nhận',UNRECORDED,l,1146,iw,{size:23});p.field('Thời hạn kiểm tra lần tới',UNRECORDED,l,1181,iw,{size:23});p.field('Đo dung tích / trọng tải / dấu hiệu chở hàng',UNRECORDED,l,1216,iw,{size:22});p.field('Hạn hiệu lực giấy tờ tham chiếu',date(d.expiresOn),l,1251,iw,{size:23});p.field('Trọng tải / sức chở đã khai',`${number(v.capacity,'tấn')} / ${number(v.capacityTeu,'TEU')}`,l,1286,iw,{size:23});p.field('Yêu cầu, lưu ý sau kiểm tra',UNRECORDED,l,1321,iw,{size:23});p.text('Các ô kết quả để trống; không xác nhận đã kiểm tra hoặc đạt yêu cầu.',l,1355,iw,{size:21,weight:700,color:RED});
+  p.box(l+5,1387,330,164,{color:'#999',width:1});p.text('Vị trí ảnh phương tiện',l+20,1440,300,{size:23,align:'center'});p.text('(chưa cung cấp ảnh kiểm tra)',l+20,1476,300,{size:19,italic:true,color:MUTED,align:'center'});p.signature(l+502,1410,520,150);p.text(`GCN tham chiếu: ${plain(d.number)} · Ngày cấp đã khai: ${date(d.issuedOn)}`,l,1587,iw,{size:20,italic:true});p.text('Lưu ý: Thông tin được dựng từ hồ sơ hiện tại; không có chữ ký, con dấu hoặc ảnh kiểm tra gốc.',l,1622,iw,{size:19,italic:true});return p;
+}
+function other(v,d){
+  const p=new Sheet(PORTRAIT,'Mẫu thông tin chung — chưa có biểu mẫu đối chiếu',null);p.simulation();p.box(74,67,1092,1595,{width:1.6});nationalHeader(p,250,137,740,25);p.heading('GIẤY TỜ THAM CHIẾU',104,302,1032,42);p.heading('BẢN TRÌNH BÀY THÔNG TIN ĐÃ KHAI BÁO',104,349,1032,26);const x=108,w=1024;simpleRows(p,[['Loại giấy tờ',d.type],['Số giấy tờ',d.number],['Ngày cấp',date(d.issuedOn)],['Hiệu lực đến',date(d.expiresOn)]],x,449,w,{size:27,gap:65});p.rule(x,700,w);p.text('THÔNG TIN PHƯƠNG TIỆN THAM CHIẾU',x,756,w,{size:28,weight:700});simpleRows(p,[['Tên phương tiện',v.name],['Số đăng ký',v.registration],['Chủ phương tiện',v.owner],['Loại phương tiện',v.kind],['Cấp phương tiện',v.grade],['Trọng tải / sức chở',`${number(v.capacity,'tấn')} / ${number(v.capacityTeu,'TEU')}`],['Dài × rộng × chìm đã khai',`${number(v.length)} × ${number(v.width)} × ${number(v.draft)} m`],['Liên hệ đã khai',v.phone],['MMSI đã khai',v.mmsi]],x,816,w,{size:26,gap:57});p.text('Chưa có biểu mẫu chuyên biệt tương ứng trong bộ hồ sơ tham chiếu. Trang này chỉ phục vụ xem dữ liệu đã khai báo; không xác nhận tính xác thực, hiệu lực hoặc kết quả xử lý.',x,1362,w,{size:24,italic:true,color:MUTED,maxLines:3,lineHeight:32});p.signature(584,1490,530,145);return [p];
+}
+async function jpegBlob(canvas){const blob=typeof canvas.convertToBlob==='function'?await canvas.convertToBlob({type:'image/jpeg',quality:.95}):await new Promise((resolve,reject)=>{try{canvas.toBlob(b=>b?resolve(b):reject(new Error('Không xuất được ảnh xem trước.')),'image/jpeg',.95);}catch(e){reject(e);}});if(!blob||blob.type!=='image/jpeg')throw new Error('Trình duyệt chưa hỗ trợ xuất ảnh JPEG cho PDF.');return blob;}
+function jpegInfo(bytes){
+  if(bytes[0]!==255||bytes[1]!==216)throw new Error('Ảnh xem trước không phải JPEG hợp lệ.');let at=2;
+  while(at+3<bytes.length){if(bytes[at]!==255){at++;continue;}while(bytes[at]===255)at++;const marker=bytes[at++];if(marker===217||marker===218)break;if(marker===1||(marker>=208&&marker<=215))continue;const length=(bytes[at]<<8)|bytes[at+1];if(length<2||at+length>bytes.length)break;if(marker>=192&&marker<=207&&![196,200,204].includes(marker)){const info={height:(bytes[at+3]<<8)|bytes[at+4],width:(bytes[at+5]<<8)|bytes[at+6],channels:bytes[at+7]};if(bytes[at+2]!==8||!info.width||!info.height||![1,3].includes(info.channels))break;return info;}at+=length;}throw new Error('Không đọc được kích thước ảnh JPEG.');
+}
+async function pagesPdf(pages){
+  const encoder=new TextEncoder(),parts=[],offsets=[0];let length=0;const put=v=>{const bytes=typeof v==='string'?encoder.encode(v):v;parts.push(bytes);length+=bytes.byteLength;};const obj=(id,text)=>{offsets[id]=length;put(`${id} 0 obj\n${text}\nendobj\n`);};
+  put('%PDF-1.4\n');put(new Uint8Array([37,226,227,207,211,10]));obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,`<< /Type /Pages /Kids [${pages.map((_,i)=>`${3+i*3} 0 R`).join(' ')}] /Count ${pages.length} >>`);
+  for(let i=0;i<pages.length;i++){const page=pages[i],pageId=3+i*3,contentId=pageId+1,imageId=pageId+2,bytes=new Uint8Array(await page.blob.arrayBuffer()),info=jpegInfo(bytes),size=page.size;obj(pageId,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${size.pdfWidth} ${size.pdfHeight}] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`);const commands=`q\n${size.pdfWidth} 0 0 ${size.pdfHeight} 0 0 cm\n/Im0 Do\nQ\n`;obj(contentId,`<< /Length ${encoder.encode(commands).byteLength} >>\nstream\n${commands}endstream`);offsets[imageId]=length;put(`${imageId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${info.width} /Height ${info.height} /ColorSpace ${info.channels===1?'/DeviceGray':'/DeviceRGB'} /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.byteLength} >>\nstream\n`);put(bytes);put('\nendstream\nendobj\n');}
+  const infoId=3+pages.length*3;obj(infoId,'<< /Title (Research-only vessel document simulation) /Creator (KBML research prototype) /Producer (Local browser canvas PDF) >>');const xref=length,count=infoId+1;put(`xref\n0 ${count}\n0000000000 65535 f \n`);for(let id=1;id<count;id++)put(`${String(offsets[id]).padStart(10,'0')} 00000 n \n`);put(`trailer\n<< /Size ${count} /Root 1 0 R /Info ${infoId} 0 R >>\nstartxref\n${xref}\n%%EOF\n`);return new Blob(parts,{type:'application/pdf'});
+}
+/** Uses only existing vessel/doc fields; all inspection, equipment, issuer and
+ * insurance-specific details remain explicitly unrecorded when not supplied. */
+export async function createCertificatePdf(vessel,doc){
+  if(!vessel||typeof vessel!=='object'||!doc||typeof doc!=='object')throw new Error('Chưa có thông tin phương tiện hoặc giấy tờ để tạo bản mô phỏng.');if(globalThis.document?.fonts?.ready)await document.fonts.ready;
+  const kind=kindOf(doc.type),sheets=kind==='registration'?registration(vessel,doc):kind==='insurance'?insurance(vessel,doc):kind==='technical'?[technicalCertificate(vessel,doc),technicalEquipment(vessel,doc),technicalReport(vessel,doc)]:other(vessel,doc);
+  const pages=[];for(let i=0;i<sheets.length;i++){const sheet=sheets[i].finish(i+1,sheets.length);pages.push({blob:await jpegBlob(sheet.canvas),size:sheet.size,title:sheet.title});}
+  const blob=await pagesPdf(pages),previewPages=pages.map(({blob,size,title})=>({blob,width:size.width,height:size.height,title}));const templateLabel={registration:'Đăng ký phương tiện · Mẫu số 6',insurance:'Chứng nhận bảo hiểm',technical:'Hồ sơ an toàn kỹ thuật · 3 trang',other:'Thông tin chung · Chưa có biểu mẫu đối chiếu'}[kind];
+  const sourceLabel=kind==='other'?'Mẫu thông tin chung; chưa có biểu mẫu đối chiếu':`Tham chiếu bố cục hồ sơ Tân Cảng 22, ${kind==='technical'?'trang 5 → 4 → 3':kind==='registration'?'trang 1':'trang 2'}`;
+  return {blob,previewBlob:previewPages[0].blob,previewPages,fileName:`KBML_MO-PHONG_${slug(doc.type)}_${slug(vessel.registration||vessel.name,'phuong-tien')}.pdf`,pageCount:pages.length,templateLabel,sourceLabel};
 }
